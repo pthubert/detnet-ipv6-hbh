@@ -177,7 +177,7 @@ RPL HbH -> TrackID
 
     <!--  1111111111111111    -->
    <section anchor="seqo" numbered="true" toc="default">
-      <name>Sequencing Option</name>
+      <name>DetNet Sequencing Option</name>
 
     <!--  2222222222222222    -->
 
@@ -237,6 +237,17 @@ RPL HbH -> TrackID
     <dd> 8-bit identifier of the type of option. Value TBD by IANA.
     </dd>
 
+
+  <dt>Opt Data Len:</dt>
+    <dd> <t>8-bit length of the option data.</t>
+    </dd>
+
+
+  <dt>Reserved:</dt>
+    <dd> <t>8-bit field, set to 0 and ignored on reception.</t>
+    </dd>
+
+
   <dt>Sequence Type:</dt>
     <dd> <t>8-bit identifier of the type of sequencing information.
     Value to be confirmed by IANA.</t>
@@ -245,8 +256,8 @@ RPL HbH -> TrackID
    <thead>
 
           <tr><th align='center'> Seq. Type Value</th>
-              <th align='left'>Sequencing Type</th>
-              <th align='left'>Commin Name</th>
+              <th align='left'>Category</th>
+              <th align='left'>Common Name</th>
               <th align='left'>Sequencing Information Format</th></tr>
 
    </thead>
@@ -298,10 +309,18 @@ RPL HbH -> TrackID
         </table>
 
     </dd>
+
+
+  <dt>Sequencing Information:</dt>
+    <dd> <t>Variable size, as indicated in <xref target="seqo-seqt"/>.</t>
+
+    </dd>
+
+
     </dl>
 
     </section>
-    <!-- Sequencing Option -->
+    <!-- DetNet Sequencing Option -->
     <!--  1111111111111111    -->
 
    <section anchor="patho" numbered="true" toc="default">
@@ -437,10 +456,98 @@ RPL HbH -> TrackID
 
 
 
-    <section numbered="true" toc="default">
+    <section anchor="iana" numbered="true" toc="default">
       <name>IANA Considerations</name>
-      <t>This document has no IANA actions.
-      </t>
+
+    <section anchor="iana-st" numbered="true" toc="default">
+      <name>New Subregistry for the Sequencing Type</name>
+<t>
+	This specification creates a new Subregistry for the "Sequencing Type of the
+    Sequencing Option" under the "Internet Protocol Version 6 (IPv6) Parameters"
+    registry.
+</t>
+<ul spacing='normal'>
+  <li> Possible values are 8-bit unsigned integers (0..255).</li>
+  <li> Registration procedure is "IETF Review" <xref target='RFC8126'/>.</li>
+  <li> Initial allocation is as Suggested in <xref target='iana-st-tab'/>:</li>
+</ul>
+
+
+
+
+   <table anchor='iana-st-tab'><name>Sequence Type values</name>
+   <thead>
+      <tr><td>Suggested Value</td><td>Meaning</td><td>Reference</td></tr>
+   </thead>
+   <tbody>
+          <tr><td align='center'>1</td>
+              <td align='left'>Basic Sequence Counter</td>
+              <td align='left'>THIS RFC</td></tr>
+
+          <tr><td align='center'>2</td>
+              <td align='left'>Zero-avoiding Sequence Counter</td>
+              <td align='left'>THIS RFC</td></tr>
+
+          <tr><td align='center'>3</td>
+              <td align='left'>RPL Sequence Counter</td>
+              <td align='left'>THIS RFC</td></tr>
+
+          <tr><td align='center'>11</td>
+              <td align='left'>Fractional NTP time stamp</td>
+              <td align='left'>THIS RFC</td></tr>
+
+          <tr><td align='center'>12</td>
+              <td align='left'>Short NTP time stamp</td>
+              <td align='left'>THIS RFC</td></tr>
+
+
+          <tr><td align='center'>13</td>
+              <td align='left'>PTP time stamp</td>
+              <td align='left'>THIS RFC</td></tr>
+
+          <tr><td align='center'>14</td>
+              <td align='left'>Short PTP time stamp</td>
+              <td align='left'>THIS RFC</td></tr>
+
+   </tbody>
+
+   </table>
+</section> <!-- New Subregistry for the Sequencing Type -->
+
+
+    <section anchor="iana-hbho" numbered="true" toc="default">
+      <name>New Hop-by-Hop Options</name>
+<t>
+	This specification updates the "Destination Options and Hop-by-Hop Options"
+    under the "Internet Protocol Version 6 (IPv6) Parameters" registry with the
+    (suggested) values below:
+</t>
+
+   <table anchor='iana-hbho-tab'><name>DetNet Hop-by-Hop Options</name>
+   <thead>
+      <tr><td align='center'>Hexa</td><td>act</td><td>chg</td><td>rest</td><td>Description</td><td>Reference</td></tr>
+   </thead>
+   <tbody>
+          <tr><td align='center'>0x12</td>
+              <td>00</td><td>0</td><td>10010</td>
+              <td>DetNet Sequencing Option</td>
+              <td>THIS RFC</td></tr>
+          <tr><td align='center'>0x13</td>
+              <td>00</td><td>0</td><td>10011</td>
+              <td>DetNet Local Path Option</td>
+              <td>THIS RFC</td></tr>
+          <tr><td align='center'>0x14</td>
+              <td>00</td><td>0</td><td>10100</td>
+              <td>DetNet Global Path Option</td>
+              <td>THIS RFC</td></tr>
+
+   </tbody>
+   </table>
+
+
+
+</section> <!-- New Hop-by-Hop Options -->
+
     </section>
       <!--IANA Considerations-->
     <!--  000000000000000000000    -->
@@ -478,6 +585,8 @@ RPL HbH -> TrackID
 
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8200.xml"/>
 <!-- IPv6 -->
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8126.xml"/>
+<!-- IANA -->
 
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8877.xml"/>
 <!-- Guidelines for Defining Packet Timestamps -->

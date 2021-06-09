@@ -67,17 +67,19 @@ Table of Contents
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
    2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   4
    3.  The DetNet Options  . . . . . . . . . . . . . . . . . . . . .   4
-     3.1.  Sequencing Option . . . . . . . . . . . . . . . . . . . .   4
+     3.1.  DetNet Sequencing Option  . . . . . . . . . . . . . . . .   4
      3.2.  RPL Packet Information  . . . . . . . . . . . . . . . . .   6
      3.3.  DetNet Local Path Option  . . . . . . . . . . . . . . . .   7
      3.4.  DetNet Global Path Option . . . . . . . . . . . . . . . .   7
    4.  Security Considerations . . . . . . . . . . . . . . . . . . .   8
    5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   8
-   6.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   8
-   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   8
-     7.1.  Normative References  . . . . . . . . . . . . . . . . . .   8
-     7.2.  Informative References  . . . . . . . . . . . . . . . . .   9
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  10
+     5.1.  New Subregistry for the Sequencing Type . . . . . . . . .   8
+     5.2.  New Hop-by-Hop Options  . . . . . . . . . . . . . . . . .   9
+   6.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .   9
+   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   9
+     7.1.  Normative References  . . . . . . . . . . . . . . . . . .   9
+     7.2.  Informative References  . . . . . . . . . . . . . . . . .  10
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  11
 
 1.  Introduction
 
@@ -96,24 +98,6 @@ Table of Contents
    perform adequate forwading operations so as to provide end-to-end
    reliability and bounded latency guarantees.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-Thubert                 Expires 11 December 2021                [Page 2]
-
-Internet-Draft             DetNet HbH Options                  June 2021
-
-
    The "6TiSCH Architecture" [6TiSCH-ARCHI] leverages RPL, the "Routing
    Protocol for Low Power and Lossy Networks" [RFC6550] and introduces
    concept of a Track as a highly redundant RPL Destination Oriented
@@ -122,6 +106,14 @@ Internet-Draft             DetNet HbH Options                  June 2021
    that case, the TrackId is an index from a namespace associated to one
    IPv6 address of the Track Ingress node, and the Track that an IPv6
    packet follows is signaled by the combination of the source address
+
+
+
+Thubert                 Expires 11 December 2021                [Page 2]
+
+Internet-Draft             DetNet HbH Options                  June 2021
+
+
    (of the Track Ingress node), and the TrackID placed in a RPL Option
    [RFC6553] located in an IPv6 Hop-by-Hop (HbH) Options Header [IPv6]
    in the IPv6 packet.
@@ -155,7 +147,15 @@ Internet-Draft             DetNet HbH Options                  June 2021
    consider Hop-by-Hop Options to transport the information that is
    relevant to DetNet.
 
-
+   The "Deterministic Networking Data Plane Framework" [RFC8938] relies
+   on the 6-tuple to identify an IPv6 flow.  But the full DetNet
+   operations require also the capabilities to signal meta-information
+   such as a sequence within that flow, and to transport different types
+   of packets along the same path with the same treatment.  For
+   instance, it is required that Operations, Administration, and
+   Maintenance (OAM) [RFC6291] packets and/or multiple flows share the
+   same fate and resource sharing over the same Track or the same
+   Traffic Engineered (TE) [RFC3272] DetNet path.
 
 
 
@@ -169,16 +169,6 @@ Thubert                 Expires 11 December 2021                [Page 3]
 
 Internet-Draft             DetNet HbH Options                  June 2021
 
-
-   The "Deterministic Networking Data Plane Framework" [RFC8938] relies
-   on the 6-tuple to identify an IPv6 flow.  But the full DetNet
-   operations require also the capabilities to signal meta-information
-   such as a sequence within that flow, and to transport different types
-   of packets along the same path with the same treatment.  For
-   instance, it is required that Operations, Administration, and
-   Maintenance (OAM) [RFC6291] packets and/or multiple flows share the
-   same fate and resource sharing over the same Track or the same
-   Traffic Engineered (TE) [RFC3272] DetNet path.
 
    This document introduces new Hop-by-Hop options that can signal
    DetNet path and sequencing information to the intermediate relays in
@@ -205,7 +195,7 @@ Internet-Draft             DetNet HbH Options                  June 2021
    Options Header; the format of these options follow the generic
    definition in section 4.2 of [IPv6].
 
-3.1.  Sequencing Option
+3.1.  DetNet Sequencing Option
 
    A typical packet sequence can be expressed uniquely as a wrapping
    counter, represented as an unsigned integer in the option.  In that
@@ -218,14 +208,6 @@ Internet-Draft             DetNet HbH Options                  June 2021
    accomplished by utilizing the Precision Time Protocol (PTP) format
    defined in IEEE Std. 1588 [IEEE Std. 1588] or Network Time Protocol
    (NTP) [RFC5905] formats.  In that case, the timestamp resolution at
-
-
-
-Thubert                 Expires 11 December 2021                [Page 4]
-
-Internet-Draft             DetNet HbH Options                  June 2021
-
-
    the origin node that builds the option MUST be fine enough to ensure
    that two consecutive packets are never stamped with the same value.
    There is no requirement for this particular stamping function that
@@ -236,6 +218,14 @@ Internet-Draft             DetNet HbH Options                  June 2021
    grained packet sequence within a coarse grained time stamp.  In that
    case, both a time stamp option and a wrapping counter options are
    found, and the counter is used to compare packets with the same time
+
+
+
+Thubert                 Expires 11 December 2021                [Page 4]
+
+Internet-Draft             DetNet HbH Options                  June 2021
+
+
    stamp and ignored otherwise In that case, the size of the
    representation of the counter MUST be large enough to cover at least
    3 times the number of packets that may be sent with the same value of
@@ -260,8 +250,18 @@ Internet-Draft             DetNet HbH Options                  June 2021
    Option Type:  8-bit identifier of the type of option.  Value TBD by
       IANA.
 
+   Opt Data Len:  8-bit length of the option data.
+
+   Reserved:  8-bit field, set to 0 and ignored on reception.
+
    Sequence Type:  8-bit identifier of the type of sequencing
       information.  Value to be confirmed by IANA.
+
+
+
+
+
+
 
 
 
@@ -282,42 +282,42 @@ Thubert                 Expires 11 December 2021                [Page 5]
 Internet-Draft             DetNet HbH Options                  June 2021
 
 
-      +=======+============+===============+===========================+
-      |  Seq. | Sequencing | Commin Name   | Sequencing                |
-      |  Type | Type       |               | Information Format        |
-      | Value |            |               |                           |
-      +=======+============+===============+===========================+
-      |   1   | Wrapping   | Basic         | 32-bit unsigned           |
-      |       | Counter    | Sequence      | integer                   |
-      |       |            | Counter       |                           |
-      +-------+============+---------------+---------------------------+
-      |   2   | Wrapping   | Zero-avoiding | 32-bit unsigned           |
-      |       | Counter    | Sequence      | integer, wraps to 1       |
-      |       |            | Counter       |                           |
-      +-------+============+---------------+---------------------------+
-      |   3   | Wrapping   | RPL Sequence  | 8-bit RPL sequence,       |
-      |       | Counter    | Counter       | see section 7.  of        |
-      |       |            |               | [RFC6550]                 |
-      +-------+============+---------------+---------------------------+
-      |   11  | Time Stamp | Fractional    | NTP 64-bit Timestamp      |
-      |       |            | NTP           | Format, see section       |
-      |       |            |               | 4.2.1.  of [RFC8877]      |
-      +-------+============+---------------+---------------------------+
-      |   12  | Time Stamp | Short NTP     | NTP 32-bit Timestamp      |
-      |       |            |               | Format, see section       |
-      |       |            |               | 4.2.2.  of [RFC8877]      |
-      +-------+============+---------------+---------------------------+
-      |   13  | Time Stamp | PTP           | PTP 80-bit Timestamp      |
-      |       |            |               | Format, see [IEEE         |
-      |       |            |               | Std. 1588]                |
-      +-------+============+---------------+---------------------------+
-      |   14  | Time Stamp | Short PTP     | PTP 64-bit Truncated      |
-      |       |            |               | Timestamp Format,         |
-      |       |            |               | see section 4.3. of       |
-      |       |            |               | [RFC8877]                 |
-      +-------+============+---------------+---------------------------+
+       +=======+==========+===============+===========================+
+       |  Seq. | Category | Common Name   | Sequencing Information    |
+       |  Type |          |               | Format                    |
+       | Value |          |               |                           |
+       +=======+==========+===============+===========================+
+       |   1   | Wrapping | Basic         | 32-bit unsigned integer   |
+       |       | Counter  | Sequence      |                           |
+       |       |          | Counter       |                           |
+       +-------+==========+---------------+---------------------------+
+       |   2   | Wrapping | Zero-avoiding | 32-bit unsigned integer,  |
+       |       | Counter  | Sequence      | wraps to 1                |
+       |       |          | Counter       |                           |
+       +-------+==========+---------------+---------------------------+
+       |   3   | Wrapping | RPL Sequence  | 8-bit RPL sequence, see   |
+       |       | Counter  | Counter       | section 7.  of [RFC6550]  |
+       +-------+==========+---------------+---------------------------+
+       |   11  | Time     | Fractional    | NTP 64-bit Timestamp      |
+       |       | Stamp    | NTP           | Format, see section       |
+       |       |          |               | 4.2.1.  of [RFC8877]      |
+       +-------+==========+---------------+---------------------------+
+       |   12  | Time     | Short NTP     | NTP 32-bit Timestamp      |
+       |       | Stamp    |               | Format, see section       |
+       |       |          |               | 4.2.2.  of [RFC8877]      |
+       +-------+==========+---------------+---------------------------+
+       |   13  | Time     | PTP           | PTP 80-bit Timestamp      |
+       |       | Stamp    |               | Format, see [IEEE Std.    |
+       |       |          |               | 1588]                     |
+       +-------+==========+---------------+---------------------------+
+       |   14  | Time     | Short PTP     | PTP 64-bit Truncated      |
+       |       | Stamp    |               | Timestamp Format, see     |
+       |       |          |               | section 4.3. of [RFC8877] |
+       +-------+==========+---------------+---------------------------+
 
                   Table 1: Sequence Type values (suggested)
+
+   Sequencing Information:  Variable size, as indicated in Table 1.
 
 3.2.  RPL Packet Information
 
@@ -408,7 +408,65 @@ Internet-Draft             DetNet HbH Options                  June 2021
 
 5.  IANA Considerations
 
-   This document has no IANA actions.
+5.1.  New Subregistry for the Sequencing Type
+
+   This specification creates a new Subregistry for the "Sequencing Type
+   of the Sequencing Option" under the "Internet Protocol Version 6
+   (IPv6) Parameters" registry.
+
+   *  Possible values are 8-bit unsigned integers (0..255).
+
+   *  Registration procedure is "IETF Review" [RFC8126].
+
+   *  Initial allocation is as Suggested in Table 2:
+
+     +-----------------+--------------------------------+-----------+
+     | Suggested Value | Meaning                        | Reference |
+     +-----------------+--------------------------------+-----------+
+     |        1        | Basic Sequence Counter         | THIS RFC  |
+     +-----------------+--------------------------------+-----------+
+     |        2        | Zero-avoiding Sequence Counter | THIS RFC  |
+     +-----------------+--------------------------------+-----------+
+     |        3        | RPL Sequence Counter           | THIS RFC  |
+     +-----------------+--------------------------------+-----------+
+     |        11       | Fractional NTP time stamp      | THIS RFC  |
+     +-----------------+--------------------------------+-----------+
+     |        12       | Short NTP time stamp           | THIS RFC  |
+     +-----------------+--------------------------------+-----------+
+     |        13       | PTP time stamp                 | THIS RFC  |
+     +-----------------+--------------------------------+-----------+
+     |        14       | Short PTP time stamp           | THIS RFC  |
+     +-----------------+--------------------------------+-----------+
+
+                      Table 2: Sequence Type values
+
+
+
+
+
+
+Thubert                 Expires 11 December 2021                [Page 8]
+
+Internet-Draft             DetNet HbH Options                  June 2021
+
+
+5.2.  New Hop-by-Hop Options
+
+   This specification updates the "Destination Options and Hop-by-Hop
+   Options" under the "Internet Protocol Version 6 (IPv6) Parameters"
+   registry with the (suggested) values below:
+
+   +------+-----+-----+-------+---------------------------+-----------+
+   | Hexa | act | chg | rest  | Description               | Reference |
+   +------+-----+-----+-------+---------------------------+-----------+
+   | 0x12 | 00  | 0   | 10010 | DetNet Sequencing Option  | THIS RFC  |
+   +------+-----+-----+-------+---------------------------+-----------+
+   | 0x13 | 00  | 0   | 10011 | DetNet Local Path Option  | THIS RFC  |
+   +------+-----+-----+-------+---------------------------+-----------+
+   | 0x14 | 00  | 0   | 10100 | DetNet Global Path Option | THIS RFC  |
+   +------+-----+-----+-------+---------------------------+-----------+
+
+                    Table 3: DetNet Hop-by-Hop Options
 
 6.  Acknowledgments
 
@@ -423,6 +481,11 @@ Internet-Draft             DetNet HbH Options                  June 2021
               DOI 10.17487/RFC8200, July 2017,
               <https://www.rfc-editor.org/info/rfc8200>.
 
+   [RFC8126]  Cotton, M., Leiba, B., and T. Narten, "Guidelines for
+              Writing an IANA Considerations Section in RFCs", BCP 26,
+              RFC 8126, DOI 10.17487/RFC8126, June 2017,
+              <https://www.rfc-editor.org/info/rfc8126>.
+
    [RFC8877]  Mizrahi, T., Fabini, J., and A. Morton, "Guidelines for
               Defining Packet Timestamps", RFC 8877,
               DOI 10.17487/RFC8877, September 2020,
@@ -435,20 +498,19 @@ Internet-Draft             DetNet HbH Options                  June 2021
               <https://tools.ietf.org/html/draft-hinden-6man-hbh-
               processing-00>.
 
+
+
+
+Thubert                 Expires 11 December 2021                [Page 9]
+
+Internet-Draft             DetNet HbH Options                  June 2021
+
+
    [DetNet-ARCHI]
               Finn, N., Thubert, P., Varga, B., and J. Farkas,
               "Deterministic Networking Architecture", RFC 8655,
               DOI 10.17487/RFC8655, October 2019,
               <https://www.rfc-editor.org/info/rfc8655>.
-
-
-
-
-
-Thubert                 Expires 11 December 2021                [Page 8]
-
-Internet-Draft             DetNet HbH Options                  June 2021
-
 
    [6TiSCH-ARCHI]
               Thubert, P., Ed., "An Architecture for IPv6 over the Time-
@@ -490,21 +552,21 @@ Internet-Draft             DetNet HbH Options                  June 2021
               DOI 10.17487/RFC6550, March 2012,
               <https://www.rfc-editor.org/info/rfc6550>.
 
+
+
+
+
+
+Thubert                 Expires 11 December 2021               [Page 10]
+
+Internet-Draft             DetNet HbH Options                  June 2021
+
+
    [RFC6553]  Hui, J. and JP. Vasseur, "The Routing Protocol for Low-
               Power and Lossy Networks (RPL) Option for Carrying RPL
               Information in Data-Plane Datagrams", RFC 6553,
               DOI 10.17487/RFC6553, March 2012,
               <https://www.rfc-editor.org/info/rfc6553>.
-
-
-
-
-
-
-Thubert                 Expires 11 December 2021                [Page 9]
-
-Internet-Draft             DetNet HbH Options                  June 2021
-
 
    [DetNet-PS]
               Finn, N. and P. Thubert, "Deterministic Networking Problem
@@ -545,6 +607,17 @@ Internet-Draft             DetNet HbH Options                  June 2021
 
 Author's Address
 
+
+
+
+
+
+
+Thubert                 Expires 11 December 2021               [Page 11]
+
+Internet-Draft             DetNet HbH Options                  June 2021
+
+
    Pascal Thubert (editor)
    Cisco Systems, Inc
    France
@@ -557,4 +630,43 @@ Author's Address
 
 
 
-Thubert                 Expires 11 December 2021               [Page 10]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Thubert                 Expires 11 December 2021               [Page 12]
