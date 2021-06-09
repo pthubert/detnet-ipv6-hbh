@@ -1,0 +1,588 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE rfc SYSTEM "rfc2629-xhtml.ent">
+
+<!-- Compiles with XML2RFC v3 https://xml2rfc.tools.ietf.org/cgi-bin/xml2rfc-dev.cgi -->
+
+<?rfc toc="yes"?>
+<?rfc tocompact="yes"?>
+<?rfc tocdepth="3"?>
+<?rfc tocindent="yes"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes"?>
+<?rfc comments="yes"?>
+<?rfc inline="yes"?>
+<?rfc compact="no"?>
+<?rfc subcompact="no"?>
+<?rfc authorship="yes"?>
+<?rfc tocappendix="yes"?>
+<rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" docName="draft-pthubert-detnet-ipv6-hbh-02"
+     ipr="trust200902" obsoletes="" updates="" submissionType="IETF" xml:lang="en" version="3">
+  <front>
+    <title abbrev="DetNet HbH Options">IPv6 Hop-by-Hop Options for DetNet</title>
+    <author initials="P" surname="Thubert" fullname="Pascal Thubert" role="editor">
+      <organization abbrev="Cisco Systems">Cisco Systems, Inc</organization>
+      <address>
+    <postal>
+      <country>France</country>
+    </postal>
+    <phone>+33 497 23 26 34</phone>
+    <email>pthubert@cisco.com</email>
+      </address>
+    </author>
+
+<!--
+meta:
+sequence counter
+replication credit, set by source,decremented by replicator, incremented eliminator
+Reliability intention (like a DE bit on steroids)
+Path:
+RPL HbH -> TrackID
+-->
+    <date/>
+    <area>Routing Area</area>
+    <workgroup>DetNet</workgroup>
+    <keyword>Draft</keyword>
+    <abstract>
+      <t>
+      RFC 8938, the Deterministic Networking Data Plane Framework relies on the
+      6-tuple to identify an IPv6 flow. But the full DetNet operations require
+      also the capabilities to signal meta-information such as a sequence within
+      that flow, and to transport different types of packets along the same path
+      with the same treatment, e.g., Operations, Administration, and Maintenance
+      packets and/or multiple flows with fate and resource sharing. This
+      document introduces new Hop-by-Hop header options that can signal that
+      information to the intermediate relays.
+
+      </t>
+    </abstract>
+  </front>
+  <middle>
+
+    <section numbered="true" toc="default">
+      <name>Introduction</name>
+
+<t>
+   Section 2 of the <xref target="RFC8557">Deterministic Networking Problem
+   Statement</xref> introduces the concept of Deterministic Networking (DetNet)
+   to the IETF. DetNet extends the reach of lower layer technologies such as
+   Time-Sensitive Networking (TSN) <xref target='IEEE8021TSN'/>
+   and Timeslotted Channel Hopping (TSCH) <xref target='IEEE802154'/>
+   over IPv6 and MPLS <xref target="RFC8938"/>.
+</t>
+<t>
+   The <xref target="RFC8655">"Deterministic Networking Architecture"</xref>
+   details the contribution of layer-3 protocols, and defines three planes:
+   the Application (User) Plane, the Controller Plane, and the Network Plane.
+   <xref target="RFC8655"/> places an emphasis on the centralized model whereby
+   a controller instantiates per-flow state in the routers to perform adequate
+   forwading operations so as to provide end-to-end reliability and bounded
+   latency guarantees.
+</t>
+<t>
+   The <xref target="RFC9030">"6TiSCH Architecture"</xref> leverages RPL, the
+   <xref target="RFC6550"> "Routing Protocol for Low Power and Lossy Networks"
+   </xref> and introduces concept of a Track as a highly redundant RPL
+   Destination Oriented Directed Acyclic Graph (DODAG) rooted at the Track
+   Ingress node, that can be installed using so-called projected routes
+   <xref target='I-D.ietf-roll-dao-projection'/>. In that case, the TrackId is
+   an index from a namespace associated to one IPv6 address of the Track Ingress
+   node, and the Track that an IPv6 packet follows is signaled by the combination
+   of the source address (of the Track Ingress node), and the TrackID placed in
+   a RPL Option <xref target="RFC6553"/> located in an IPv6 Hop-by-Hop (HbH)
+   Options Header <xref target="RFC8200"/> in the IPv6 packet.
+</t>
+<t>
+   The <xref target='I-D.pthubert-raw-architecture'> "Reliable and Available
+   Wireless (RAW) Architecture/Framework"</xref>, extends the DetNet Network
+   Plane to accomodate one or multiple hops of homogeneous or heterogeneous
+   wireless technologies, e.g. a Wi-Fi6 Mesh or parallel radio access links
+   combining Wi-Fi and 5G. The RAW Architecture reuses the concept of Track and
+   introduces a new dataplane component, the Path Selection Engine (PSE), to
+   dynamically select a subpath and maintain the required quality of service
+   within a Track in the face of the rapid evolution of the medium properties.
+</t>
+<t>
+   With <xref target="RFC8200"/>, the behavior of a router upon an IPv6 packet
+   with a HbH Options Header has evolved, making the examination of the header
+   by routers along the path optional, as opposed to previously mandatory.
+   Additionally, the Option Type for any option in a HbH Options Header encodes
+   in the leftmost bits whether a router that inspects the header should drop
+   the packet or ignore the option when encountering an unknown option. Combined,
+   these capabilities enable a larger use of the header beyond the boundaries of
+   a limited domain, as examplified by the change of behavior of the RPL data
+   plane, that was changed to allow a packet with a RPL option to escape the RPL
+   domain in the larger Internet <xref target="RFC9008"/>.
+</t>
+<t>
+  <xref target='I-D.hinden-6man-hbh-processing'>"IPv6 Hop-by-Hop Options
+  Processing Procedures"</xref> further specifies the procedures for how IPv6
+  Hop-by-Hop options are processed to make their processing even more practical
+  and increase their use in the Internet. In that context, it makes sense to
+  consider the Hop-by-Hop Options to transport the information that is relevant
+  to DetNet.
+</t>
+<t>
+  The <xref target='RFC8938'>"Deterministic Networking Data Plane Framework"
+  </xref> relies on the 6-tuple to identify an IPv6 flow. But the full DetNet
+  operations require also the capabilities to signal meta-information such as
+  a sequence within that flow, and to transport different types of packets
+  along the same path with the same treatment. For instance, it is required that
+  Operations, Administration, and Maintenance (OAM) <xref target='RFC6291'/>
+  packets and/or multiple flows share the same fate and resource sharing over
+  the same Track or the same Traffic Engineered (TE) <xref target="RFC3272"/>
+  DetNet path.
+</t>
+<t>
+  This document introduces new Hop-by-Hop options that can signal DetNet path
+  and sequencing information to the intermediate relays; with this method, the
+  DetNet information is available early in eh header chain of the packet and
+  presented in an abstract form that is independant of the transport layer and
+  can be added as part of a serive instance encapsulation by the Ingress of the
+  DetNet path.
+</t>
+
+
+    </section>
+    <!-- Introduction -->
+    <!--  000000000000000000000    -->
+
+
+   <section anchor="terms" numbered="true" toc="default">
+      <name>Terminology</name>
+      <t>Timestamp semantics and timestamp formats used in this document are
+      defined in <xref target="RFC8877">"Guidelines for Defining Packet
+      Timestamps"</xref>.
+      </t>
+      <t>The Deterministic Networking terms used in this document are defined in
+      the <xref target="RFC8655">"Deterministic Networking Architecture"</xref>.
+      </t>
+      <t>The terms Track and TrackID are defined in the <xref target="RFC9030">
+      "6TiSCH Architecture"</xref>.
+      </t>
+
+    <!--  1111111111111111    -->
+    </section>
+    <!-- Terminology -->
+
+    <!--  00000000000000    -->
+
+   <section anchor="ctxt" numbered="true" toc="default">
+      <name>The DetNet Options</name>
+    <!--  1111111111111111    -->
+   <t>
+   This document defines a number of IPv6 options to be placed in a
+   HbH Options Header; the format of these options follow the generic
+   definition in section 4.2 of <xref target="RFC8200"/>.
+   </t>
+
+    <!--  1111111111111111    -->
+   <section anchor="seqo" numbered="true" toc="default">
+      <name>Sequencing Option</name>
+
+    <!--  2222222222222222    -->
+
+<!--
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
+      |  Option Type  |  Opt Data Len |  Option Data
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
+-->
+   <t>
+   A typical packet sequence can be expressed uniquely as a wrapping counter,
+   represented as an unsigned integer in the option. In that case, the size of
+   the representation MUST be large enough to cover several times the upper
+   bound on out-of-order packet delivery in terms of number of packets.
+   </t>
+   <t>
+   This specification also allows to use a time stamp for the packet sequencing
+   following the recommendations in <xref target="RFC8877"/>.
+   This can be accomplished by utilizing the Precision Time Protocol (PTP)
+   format defined in IEEE Std. 1588 <xref target="IEEEstd1588" format="default"/>
+   or Network Time Protocol (NTP) <xref target="RFC5905"/> formats.
+   In that case, the timestamp resolution at the node that builds the option
+   MUST be fine enough to ensure that two consecutive packets are never stamped
+   with the same value.
+   </t>
+   <t>
+   This specification also allows for an hybrid model with a coarse grained
+   packet sequence within a coarse grained time stamp. In that case, both a
+   time stamp option and a wrapping counter options are found, and the counter
+   is used to compare packets with the same time stamp.
+    </t>
+<figure anchor='seqo-fmt'><name>Sequencing Option Format</name>
+              <artwork align="center">
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|  Option Type  |  Opt Data Len |   Seq. Type   |    Reserved   |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+.                                                               .
+.          Sequencing Information (variable Size)               .
+.                                                               .
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ </artwork>
+</figure>
+
+
+  <t> Sequencing Option fields:</t>
+  <dl  spacing='normal'>
+
+  <dt>Option Type:</dt>
+    <dd> 8-bit identifier of the type of option. Value TBD by IANA.
+    </dd>
+
+  <dt>Sequence Type:</dt>
+    <dd> <t>8-bit identifier of the type of sequencing information.
+    Value to be confirmed by IANA.</t>
+
+        <table anchor="seqo-seqt"><name>Sequence Type values (suggested)</name>
+   <thead>
+
+          <tr><th align='center'> Seq. Type Value</th>
+              <th align='left'>Sequencing Type</th>
+              <th align='left'>Commin Name</th>
+              <th align='left'>Sequencing Information Format</th></tr>
+
+   </thead>
+   <tbody>
+          <tr><td align='center'>1</td>
+              <th align='left'>Wrapping Counter</th>
+              <td align='left'>Basic Sequence Counter</td>
+              <td align='left'>32-bit unsigned integer</td></tr>
+
+          <tr><td align='center'>2</td>
+              <th align='left'>Wrapping Counter</th>
+              <td align='left'>Zero-avoiding Sequence Counter</td>
+              <td align='left'>32-bit unsigned integer, wraps to 1</td></tr>
+
+          <tr><td align='center'>3</td>
+              <th align='left'>Wrapping Counter</th>
+              <td align='left'>RPL Sequence Counter</td>
+              <td align='left'>8-bit RPL sequence, see section 7.
+              of <xref target="RFC6550"/></td></tr>
+
+          <tr><td align='center'>11</td>
+              <th align='left'>Time Stamp</th>
+              <td align='left'>Fractional NTP</td>
+              <td align='left'>NTP 64-bit Timestamp Format, see section 4.2.1.
+              of <xref target="RFC8877"/></td></tr>
+
+          <tr><td align='center'>12</td>
+              <th align='left'>Time Stamp</th>
+              <td align='left'>Short NTP</td>
+              <td align='left'>NTP 32-bit Timestamp Format, see section 4.2.2.
+              of <xref target="RFC8877"/></td></tr>
+
+
+          <tr><td align='center'>13</td>
+              <th align='left'>Time Stamp</th>
+              <td align='left'>PTP</td>
+              <td align='left'>PTP 80-bit Timestamp Format, see
+              <xref target="IEEEstd1588"/></td></tr>
+
+          <tr><td align='center'>14</td>
+              <th align='left'>Time Stamp</th>
+              <td align='left'>Short PTP</td>
+              <td align='left'>PTP 64-bit Truncated Timestamp Format, see
+              section 4.3. of <xref target="RFC8877"/></td></tr>
+
+
+
+    </tbody>
+        </table>
+
+    </dd>
+    </dl>
+
+    </section>
+    <!-- Sequencing Option -->
+    <!--  1111111111111111    -->
+
+   <section anchor="patho" numbered="true" toc="default">
+      <name>RPL Packet Information</name>
+
+    <!--  2222222222222222    -->
+
+   <t>
+   6TiSCH <xref target="RFC9030"/>
+   and RAW <xref target='I-D.pthubert-raw-architecture'/>
+   signal a Track using a RPL Option <xref target="RFC6553"/>
+   with a RPLInstanceID used as TrackID.
+   This specification reuses the RPL option as a method to signal a DetNet path.
+   In that case, the Projected-Route 'P' flag
+   <xref target='I-D.ietf-roll-dao-projection'/> MUST be set to 1, and the O, R,
+   F flags, as well as the Sender Rank field, MUST be set to 0 by the originator,
+   forwarded as-is, and ignored on reception.
+   </t>
+
+    </section>
+    <!-- RPL Packet Information -->
+    <!--  1111111111111111    -->
+
+
+
+   <section anchor="dpatho" numbered="true" toc="default">
+      <name>DetNet Local Path Option</name>
+
+    <!--  2222222222222222    -->
+
+
+   <t>
+   This specification also allows for an hybrid model with a coarse grained
+   packet sequence within a coarse grained time stamp. In that case, both a
+   time stamp option and a wrapping counter options are found, and the counter
+   is used to compare packets with the same time stamp.
+    </t>
+<figure anchor='patho-fmt'><name>DetNet Local Path Option Format</name>
+              <artwork align="center">
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|  Option Type  |  Opt Data Len |    Local Path ID              |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ </artwork>
+</figure>
+
+
+  <t> Sequencing Option fields:</t>
+  <dl  spacing='normal'>
+
+  <dt>Option Type:</dt>
+    <dd> 8-bit identifier of the type of option. Value TBD by IANA.
+    </dd>
+
+  <dt>Opt Data Len:</dt>
+    <dd> <t>8-bit length of the option data, set to 2.</t>
+    </dd>
+
+  <dt>Local Path ID:</dt>
+    <dd> <t>16-bit identifier of the DetNet Path, taken from a local
+   namespace associated with the IPv6 source address of the packet.</t>
+    </dd>
+  </dl>
+    </section>
+    <!-- DetNet Path Option -->
+    <!--  1111111111111111    -->
+
+
+   <section anchor="gpatho" numbered="true" toc="default">
+      <name>DetNet  Global Path Option</name>
+
+    <!--  2222222222222222    -->
+
+
+   <t>
+   This specification also allows for an hybrid model with a coarse grained
+   packet sequence within a coarse grained time stamp. In that case, both a
+   time stamp option and a wrapping counter options are found, and the counter
+   is used to compare packets with the same time stamp.
+    </t>
+<figure anchor='gpatho-fmt'><name>DetNet Glocal Path Option Format</name>
+              <artwork align="center">
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|  Option Type  |  Opt Data Len |   Origin Autonomous System    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                          Global Path ID                       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ </artwork>
+</figure>
+
+
+  <t> Sequencing Option fields:</t>
+  <dl  spacing='normal'>
+
+  <dt>Option Type:</dt>
+    <dd> 8-bit identifier of the type of option. Value TBD by IANA.
+    </dd>
+
+  <dt>Opt Data Len:</dt>
+    <dd> <t>8-bit length of the option data, set to 6.</t>
+    </dd>
+
+  <dt>Origin Autonomous System:</dt>
+    <dd> <t>16-bit identifier of the Autonomous Systems (AS) that originates the
+    path.
+    </t>
+    </dd>
+  <dt>Global Path ID:</dt>
+    <dd> <t>32-bit identifier of the DetNet Path, taken from a local
+   namespace associated with the origin AS of the DetNet path. The value
+   of 0 signals a DetNet path that is constrained within the local AS or the
+   local administrative DetNet domain.</t>
+    </dd>
+  </dl>
+    </section>
+    <!-- DetNet Path Option -->
+    <!--  1111111111111111    -->
+
+    </section>
+    <!-- The DetNet Options< -->
+
+
+    <!--  00000000000000    -->
+
+    <section anchor="sec" numbered="true" toc="default">
+      <name>Security Considerations</name>
+
+    </section>
+      <!--Security Considerations-->
+    <!--  000000000000000000000    -->
+
+
+
+
+    <section numbered="true" toc="default">
+      <name>IANA Considerations</name>
+      <t>This document has no IANA actions.
+      </t>
+    </section>
+      <!--IANA Considerations-->
+    <!--  000000000000000000000    -->
+
+
+   <section><name>Acknowledgments</name>
+   <t>TBD
+   </t>
+   </section>
+   <!-- Acknowledgments -->
+    <!--  000000000000000000000    -->
+
+
+  </middle>
+  <back>
+<displayreference   target="RFC8200"                  to="IPv6"/>
+<displayreference   target="RFC8557"                  to="DetNet-PS"/>
+<displayreference   target="RFC8655"                  to="DetNet-ARCHI"/>
+<displayreference   target="RFC9030"                  to="6TiSCH-ARCHI"/>
+
+
+<displayreference   target="I-D.ietf-roll-dao-projection"    to="RPL-PDAO"/>
+<displayreference   target="I-D.pthubert-raw-architecture"   to="RAW-ARCHI"/>
+<displayreference   target="I-D.hinden-6man-hbh-processing"  to="HbH-PROCESS"/>
+
+<displayreference   target="IEEE802154"               to="IEEE Std. 802.15.4"/>
+<displayreference   target="IEEEstd1588"              to="IEEE Std. 1588"/>
+<displayreference   target="IEEE8021TSN"              to="IEEE 802.1 TSN"/>
+
+
+    <references>
+      <name>References</name>
+      <references>
+    <name>Normative References</name>
+
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8200.xml"/>
+<!-- IPv6 -->
+
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8877.xml"/>
+<!-- Guidelines for Defining Packet Timestamps -->
+
+<xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.hinden-6man-hbh-processing.xml'/>
+
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8655.xml"/>
+<!-- Deterministic Networking Architecture -->
+
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9030.xml"/>
+<!-- 6TiSCH Architecture -->
+
+<xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.pthubert-raw-architecture.xml'/>
+
+      </references>
+    <!--Normative References-->
+
+
+      <references>
+    <name>Informative References</name>
+
+
+
+<xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-roll-dao-projection.xml'/>
+
+
+
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6291.xml"/>
+<!-- Guidelines for the Use of the "OAM" Acronym in the IETF  -->
+
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5905.xml"/>
+<!-- NTPv4 -->
+<!--
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8402.xml"/>
+    Segment Routing Architecture -->
+
+<!--
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8279.xml"/>
+    BIER -->
+
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6550.xml"/>
+<!-- RPL -->
+
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6553.xml"/>
+<!-- RPL option-->
+
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8557.xml"/>
+<!-- DetNet problem statement -->
+
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9008.xml"/>
+<!-- Use of RPL info -->
+
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3272.xml"/>
+<!-- TE -->
+
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8938.xml"/>
+<!--   Deterministic Networking (DetNet) Data Plane Framework -->
+
+      <reference anchor='IEEE802154'>
+         <front>
+            <title>IEEE Std. 802.15.4, Part. 15.4: Wireless Medium Access
+            Control (MAC) and Physical Layer (PHY) Specifications for Low-Rate
+            Wireless Personal Area Networks
+            </title>
+            <author>
+               <organization>IEEE standard for Information Technology</organization>
+            </author>
+            <date/>
+         </front>
+      </reference>
+      <reference anchor="IEEE8021TSN" target="http://www.ieee802.org/1/pages/tsn.html" quoteTitle="true" derivedAnchor="IEEE802.1TSN">
+        <front>
+          <title>Time-Sensitive Networking (TSN) Task Group</title>
+          <author>
+            <organization showOnFrontPage="true">IEEE 802.1</organization>
+          </author>
+        </front>
+      </reference>
+
+        <reference anchor="IEEEstd1588" target="https://ieeexplore.ieee.org/document/4579760/">
+          <front>
+            <title>IEEE Standard for a Precision Clock Synchronization Protocol for
+                Networked Measurement and Control Systems</title>
+            <seriesInfo name="IEEE" value="Standard 1588"/>
+            <author>
+                <organization>IEEE</organization>
+            </author>
+            <date/>
+        </front>
+    </reference>
+    <!--
+        <reference anchor="IEEEstd8021AS" target="https://ieeexplore.ieee.org/document/5741898/">
+        <front>
+            <title>IEEE Standard for Local and Metropolitan Area Networks - Timing
+                and Synchronization for Time-Sensitive Applications in Bridged Local
+                Area Networks</title>
+            <seriesInfo name="IEEE" value="Standard 802.1AS"/>
+            <author>
+                <organization>IEEE</organization>
+            </author>
+            <date/>
+        </front>
+    </reference>
+    -->
+   <!--Informative References-->
+    </references>
+    </references>
+  </back>
+</rfc>
+
+
