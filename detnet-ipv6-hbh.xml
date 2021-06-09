@@ -577,14 +577,15 @@ RPL HbH -> TrackID
   </middle>
   <back>
 <displayreference   target="RFC8200"                  to="IPv6"/>
-<displayreference   target="RFC8557"                  to="DetNet-PS"/>
-<displayreference   target="RFC8655"                  to="DetNet-ARCHI"/>
-<displayreference   target="RFC9030"                  to="6TiSCH-ARCHI"/>
+<displayreference   target="RFC6550"                  to="RPL"/>
+<displayreference   target="RFC8557"                  to="DetNet-PBST"/>
+<displayreference   target="RFC8655"                  to="DetNet-ARCH"/>
+<displayreference   target="RFC9030"                  to="6TiSCH-ARCH"/>
 
 
 <displayreference   target="I-D.ietf-roll-dao-projection"    to="RPL-PDAO"/>
-<displayreference   target="I-D.pthubert-raw-architecture"   to="RAW-ARCHI"/>
-<displayreference   target="I-D.hinden-6man-hbh-processing"  to="HbH-PROCESS"/>
+<displayreference   target="I-D.pthubert-raw-architecture"   to="RAW-ARCH"/>
+<displayreference   target="I-D.hinden-6man-hbh-processing"  to="HbH-UPDT"/>
 
 <displayreference   target="IEEE802154"               to="IEEE Std. 802.15.4"/>
 <displayreference   target="IEEEstd1588"              to="IEEE Std. 1588"/>

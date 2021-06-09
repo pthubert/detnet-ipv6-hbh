@@ -84,22 +84,22 @@ Table of Contents
 1.  Introduction
 
    Section 2 of the Deterministic Networking Problem Statement
-   [DetNet-PS] introduces the concept of Deterministic Networking
+   [DetNet-PBST] introduces the concept of Deterministic Networking
    (DetNet) to the IETF.  DetNet extends the reach of lower layer
    technologies such as Time-Sensitive Networking (TSN) [IEEE 802.1 TSN]
    and Timeslotted Channel Hopping (TSCH) [IEEE Std. 802.15.4] over IPv6
    and MPLS [RFC8938].
 
-   The "Deterministic Networking Architecture" [DetNet-ARCHI] details
-   the contribution of layer-3 protocols, and defines three planes: the
+   The "Deterministic Networking Architecture" [DetNet-ARCH] details the
+   contribution of layer-3 protocols, and defines three planes: the
    Application (User) Plane, the Controller Plane, and the Network
-   Plane.  [DetNet-ARCHI] places an emphasis on the centralized model
+   Plane.  [DetNet-ARCH] places an emphasis on the centralized model
    whereby a controller instantiates per-flow state in the routers to
    perform adequate forwading operations so as to provide end-to-end
    reliability and bounded latency guarantees.
 
-   The "6TiSCH Architecture" [6TiSCH-ARCHI] leverages RPL, the "Routing
-   Protocol for Low Power and Lossy Networks" [RFC6550] and introduces
+   The "6TiSCH Architecture" [6TiSCH-ARCH] leverages RPL, the "Routing
+   Protocol for Low Power and Lossy Networks" [RPL] and introduces
    concept of a Track as a highly redundant RPL Destination Oriented
    Directed Acyclic Graph (DODAG) rooted at the Track Ingress node, that
    can be installed using so-called projected routes [RPL-PDAO].  In
@@ -119,7 +119,7 @@ Internet-Draft             DetNet HbH Options                  June 2021
    in the IPv6 packet.
 
    The "Reliable and Available Wireless (RAW) Architecture/Framework"
-   [RAW-ARCHI], extends the DetNet Network Plane to accomodate one or
+   [RAW-ARCH], extends the DetNet Network Plane to accomodate one or
    multiple hops of homogeneous or heterogeneous wireless technologies,
    e.g. a Wi-Fi6 Mesh or parallel radio access links combining Wi-Fi and
    5G.  The RAW Architecture reuses the concept of Track and introduces
@@ -140,7 +140,7 @@ Internet-Draft             DetNet HbH Options                  June 2021
    changed to allow a packet with a RPL option to escape the RPL domain
    in the larger Internet [RFC9008].
 
-   "IPv6 Hop-by-Hop Options Processing Procedures" [HbH-PROCESS] further
+   "IPv6 Hop-by-Hop Options Processing Procedures" [HbH-UPDT] further
    specifies the procedures for how IPv6 Hop-by-Hop options are
    processed to make their processing even more practical and increase
    their use in the Internet.  In that context, it makes sense to
@@ -184,10 +184,10 @@ Internet-Draft             DetNet HbH Options                  June 2021
    defined in "Guidelines for Defining Packet Timestamps" [RFC8877].
 
    The Deterministic Networking terms used in this document are defined
-   in the "Deterministic Networking Architecture" [DetNet-ARCHI].
+   in the "Deterministic Networking Architecture" [DetNet-ARCH].
 
    The terms Track and TrackID are defined in the "6TiSCH Architecture"
-   [6TiSCH-ARCHI].
+   [6TiSCH-ARCH].
 
 3.  The DetNet Options
 
@@ -296,7 +296,7 @@ Internet-Draft             DetNet HbH Options                  June 2021
        |       |          | Counter       |                           |
        +-------+==========+---------------+---------------------------+
        |   3   | Wrapping | RPL Sequence  | 8-bit RPL sequence, see   |
-       |       | Counter  | Counter       | section 7.  of [RFC6550]  |
+       |       | Counter  | Counter       | section 7.  of [RPL]      |
        +-------+==========+---------------+---------------------------+
        |   11  | Time     | Fractional    | NTP 64-bit Timestamp      |
        |       | Stamp    | NTP           | Format, see section       |
@@ -321,7 +321,7 @@ Internet-Draft             DetNet HbH Options                  June 2021
 
 3.2.  RPL Packet Information
 
-   6TiSCH [6TiSCH-ARCHI] and RAW [RAW-ARCHI] signal a Track using a RPL
+   6TiSCH [6TiSCH-ARCH] and RAW [RAW-ARCH] signal a Track using a RPL
    Option [RFC6553] with a RPLInstanceID used as TrackID.  This
    specification reuses the RPL option as a method to signal a DetNet
    path.  In that case, the Projected-Route 'P' flag [RPL-PDAO] MUST be
@@ -521,27 +521,25 @@ Internet-Draft             DetNet HbH Options                  June 2021
               DOI 10.17487/RFC8877, September 2020,
               <https://www.rfc-editor.org/info/rfc8877>.
 
-   [HbH-PROCESS]
-              Hinden, R. M. and G. Fairhurst, "IPv6 Hop-by-Hop Options
+   [HbH-UPDT] Hinden, R. M. and G. Fairhurst, "IPv6 Hop-by-Hop Options
               Processing Procedures", Work in Progress, Internet-Draft,
               draft-hinden-6man-hbh-processing-00, 3 December 2020,
               <https://tools.ietf.org/html/draft-hinden-6man-hbh-
               processing-00>.
 
-   [DetNet-ARCHI]
+   [DetNet-ARCH]
               Finn, N., Thubert, P., Varga, B., and J. Farkas,
               "Deterministic Networking Architecture", RFC 8655,
               DOI 10.17487/RFC8655, October 2019,
               <https://www.rfc-editor.org/info/rfc8655>.
 
-   [6TiSCH-ARCHI]
+   [6TiSCH-ARCH]
               Thubert, P., Ed., "An Architecture for IPv6 over the Time-
               Slotted Channel Hopping Mode of IEEE 802.15.4 (6TiSCH)",
               RFC 9030, DOI 10.17487/RFC9030, May 2021,
               <https://www.rfc-editor.org/info/rfc9030>.
 
-   [RAW-ARCHI]
-              Thubert, P., Papadopoulos, G. Z., and R. Buddenberg,
+   [RAW-ARCH] Thubert, P., Papadopoulos, G. Z., and R. Buddenberg,
               "Reliable and Available Wireless Architecture/Framework",
               Work in Progress, Internet-Draft, draft-pthubert-raw-
               architecture-05, 15 November 2020,
@@ -550,9 +548,11 @@ Internet-Draft             DetNet HbH Options                  June 2021
 
 7.2.  Informative References
 
-
-
-
+   [RPL-PDAO] Thubert, P., Jadhav, R. A., and M. Gillmore, "Root
+              initiated routing state in RPL", Work in Progress,
+              Internet-Draft, draft-ietf-roll-dao-projection-16, 15
+              January 2021, <https://tools.ietf.org/html/draft-ietf-
+              roll-dao-projection-16>.
 
 
 
@@ -561,12 +561,6 @@ Thubert                 Expires 11 December 2021               [Page 10]
 
 Internet-Draft             DetNet HbH Options                  June 2021
 
-
-   [RPL-PDAO] Thubert, P., Jadhav, R. A., and M. Gillmore, "Root
-              initiated routing state in RPL", Work in Progress,
-              Internet-Draft, draft-ietf-roll-dao-projection-16, 15
-              January 2021, <https://tools.ietf.org/html/draft-ietf-
-              roll-dao-projection-16>.
 
    [RFC6291]  Andersson, L., van Helvoort, H., Bonica, R., Romascanu,
               D., and S. Mansfield, "Guidelines for the Use of the "OAM"
@@ -579,7 +573,7 @@ Internet-Draft             DetNet HbH Options                  June 2021
               Specification", RFC 5905, DOI 10.17487/RFC5905, June 2010,
               <https://www.rfc-editor.org/info/rfc5905>.
 
-   [RFC6550]  Winter, T., Ed., Thubert, P., Ed., Brandt, A., Hui, J.,
+   [RPL]      Winter, T., Ed., Thubert, P., Ed., Brandt, A., Hui, J.,
               Kelsey, R., Levis, P., Pister, K., Struik, R., Vasseur,
               JP., and R. Alexander, "RPL: IPv6 Routing Protocol for
               Low-Power and Lossy Networks", RFC 6550,
@@ -592,7 +586,7 @@ Internet-Draft             DetNet HbH Options                  June 2021
               DOI 10.17487/RFC6553, March 2012,
               <https://www.rfc-editor.org/info/rfc6553>.
 
-   [DetNet-PS]
+   [DetNet-PBST]
               Finn, N. and P. Thubert, "Deterministic Networking Problem
               Statement", RFC 8557, DOI 10.17487/RFC8557, May 2019,
               <https://www.rfc-editor.org/info/rfc8557>.
@@ -608,6 +602,12 @@ Internet-Draft             DetNet HbH Options                  June 2021
               Engineering", RFC 3272, DOI 10.17487/RFC3272, May 2002,
               <https://www.rfc-editor.org/info/rfc3272>.
 
+   [RFC8938]  Varga, B., Ed., Farkas, J., Berger, L., Malis, A., and S.
+              Bryant, "Deterministic Networking (DetNet) Data Plane
+              Framework", RFC 8938, DOI 10.17487/RFC8938, November 2020,
+              <https://www.rfc-editor.org/info/rfc8938>.
+
+
 
 
 
@@ -617,11 +617,6 @@ Thubert                 Expires 11 December 2021               [Page 11]
 
 Internet-Draft             DetNet HbH Options                  June 2021
 
-
-   [RFC8938]  Varga, B., Ed., Farkas, J., Berger, L., Malis, A., and S.
-              Bryant, "Deterministic Networking (DetNet) Data Plane
-              Framework", RFC 8938, DOI 10.17487/RFC8938, November 2020,
-              <https://www.rfc-editor.org/info/rfc8938>.
 
    [IEEE Std. 802.15.4]
               IEEE standard for Information Technology, "IEEE Std.
@@ -647,6 +642,11 @@ Author's Address
 
    Phone: +33 497 23 26 34
    Email: pthubert@cisco.com
+
+
+
+
+
 
 
 
