@@ -170,14 +170,25 @@ RPL HbH -> TrackID
       <name>The DetNet Options</name>
     <!--  1111111111111111    -->
    <t>
-   This document defines a number of IPv6 options to be placed in a
-   HbH Options Header; the format of these options follow the generic
+   This document defines new IPv6 options for DetNet to signal path and a
+   sequence to the DetNet layers. Those options are to be placed in an IPv6
+   HbH Options Header. The format of the options follow the generic
    definition in section 4.2 of <xref target="RFC8200"/>.
    </t>
 
+   <t>
+   If a DetNet Path option (see <xref target="detnetpatho"/>), including the RPL
+   Option, is present in the same HbH Option Header as a DetNet Sequencing
+   Information option (see <xref target="seqo"/>), then the sequencing
+   information applies to the signaled path across all flows that traverse that
+   path; else the sequencing information applies to the flow indicated by the
+   6-tuple <xref target='RFC8938'/>.
+   </t>
     <!--  1111111111111111    -->
+
+
    <section anchor="seqo" numbered="true" toc="default">
-      <name>DetNet Sequencing Option</name>
+      <name>DetNet Sequencing Information Option</name>
 
     <!--  2222222222222222    -->
 
@@ -212,8 +223,8 @@ RPL HbH -> TrackID
    In that case, the size of the representation of the counter MUST be large
    enough to cover at least 3 times the number of packets that may be sent with
    the same value of time stamp.
-    </t>
-<figure anchor='seqo-fmt'><name>Sequencing Option Format</name>
+   </t>
+<figure anchor='seqo-fmt'><name>Sequencing Information Option Format</name>
               <artwork align="center">
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -230,7 +241,7 @@ RPL HbH -> TrackID
 </figure>
 
 
-  <t> Sequencing Option fields:</t>
+  <t> Sequencing Information Option fields:</t>
   <dl  spacing='normal'>
 
   <dt>Option Type:</dt>
@@ -328,7 +339,22 @@ RPL HbH -> TrackID
     <!-- DetNet Sequencing Option -->
     <!--  1111111111111111    -->
 
-   <section anchor="patho" numbered="true" toc="default">
+
+   <section anchor="detnetpatho" numbered="true" toc="default">
+      <name>DetNet Path Options</name>
+
+   <t>
+   DetNet can leverage any of the following HbH options to signal a path:
+   </t>
+   <ul>
+   <li>the RPL Option containing the RPL Packet Information (RPI) <xref target="RFC6553"/>.
+   </li>
+   <li>DetNet Local Path Option  <xref target="dpatho"/>.
+   </li>
+   <li>DetNet Global Path Option <xref target="gpatho"/>.
+   </li>
+   </ul>
+   <section anchor="rplo" numbered="true" toc="default">
       <name>RPL Packet Information</name>
 
     <!--  2222222222222222    -->
@@ -347,14 +373,13 @@ RPL HbH -> TrackID
 
     </section>
     <!-- RPL Packet Information -->
-    <!--  1111111111111111    -->
+    <!--  2222222222222222    -->
+
 
 
 
    <section anchor="dpatho" numbered="true" toc="default">
       <name>DetNet Local Path Option</name>
-
-    <!--  2222222222222222    -->
 
 
    <t>
@@ -395,13 +420,12 @@ RPL HbH -> TrackID
   </dl>
     </section>
     <!-- DetNet Path Option -->
-    <!--  1111111111111111    -->
 
 
+    <!--  2222222222222222    -->
    <section anchor="gpatho" numbered="true" toc="default">
       <name>DetNet Global Path Option</name>
 
-    <!--  2222222222222222    -->
 
    <t>
    The DetNet Global Path Option transports a global path identifier which is
@@ -450,8 +474,12 @@ RPL HbH -> TrackID
     </dd>
   </dl>
     </section>
-    <!-- DetNet Path Option -->
+    <!-- DetNet Global Path Option -->
+    <!--  222222222222222    -->
+    </section>
+    <!-- DetNet Path Options -->
     <!--  1111111111111111    -->
+
 
     </section>
     <!-- The DetNet Options< -->
@@ -477,7 +505,7 @@ RPL HbH -> TrackID
 <t>
 	This specification creates a new Subregistry for the "Sequencing Type of the
     Sequencing Option" under the "Internet Protocol Version 6 (IPv6) Parameters"
-    registry.
+    registry <xref target ="IPV6-PARMS"/>.
 </t>
 <ul spacing='normal'>
   <li> Possible values are 8-bit unsigned integers (0..255).</li>
@@ -532,8 +560,8 @@ RPL HbH -> TrackID
       <name>New Hop-by-Hop Options</name>
 <t>
 	This specification updates the "Destination Options and Hop-by-Hop Options"
-    under the "Internet Protocol Version 6 (IPv6) Parameters" registry with the
-    (suggested) values below:
+    under the "Internet Protocol Version 6 (IPv6) Parameters" registry
+    <xref target ="IPV6-PARMS"/> with the (suggested) values below:
 </t>
 
    <table anchor='iana-hbho-tab'><name>DetNet Hop-by-Hop Options</name>
@@ -705,6 +733,21 @@ RPL HbH -> TrackID
         </front>
     </reference>
     -->
+
+
+
+
+
+      <reference anchor="IPV6-PARMS" target="https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters.xhtml" >
+        <front>
+          <title>Internet Protocol Version 6 (IPv6) Parameters</title>
+          <author>
+            <organization showOnFrontPage="true">IANA</organization>
+          </author>
+        </front>
+      </reference>
+
+
    <!--Informative References-->
     </references>
     </references>

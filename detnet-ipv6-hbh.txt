@@ -67,10 +67,11 @@ Table of Contents
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
    2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   4
    3.  The DetNet Options  . . . . . . . . . . . . . . . . . . . . .   4
-     3.1.  DetNet Sequencing Option  . . . . . . . . . . . . . . . .   4
-     3.2.  RPL Packet Information  . . . . . . . . . . . . . . . . .   6
-     3.3.  DetNet Local Path Option  . . . . . . . . . . . . . . . .   7
-     3.4.  DetNet Global Path Option . . . . . . . . . . . . . . . .   7
+     3.1.  DetNet Sequencing Information Option  . . . . . . . . . .   4
+     3.2.  DetNet Path Options . . . . . . . . . . . . . . . . . . .   6
+       3.2.1.  RPL Packet Information  . . . . . . . . . . . . . . .   7
+       3.2.2.  DetNet Local Path Option  . . . . . . . . . . . . . .   7
+       3.2.3.  DetNet Global Path Option . . . . . . . . . . . . . .   7
    4.  Security Considerations . . . . . . . . . . . . . . . . . . .   8
    5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   8
      5.1.  New Subregistry for the Sequencing Type . . . . . . . . .   8
@@ -105,7 +106,6 @@ Table of Contents
    can be installed using so-called projected routes [RPL-PDAO].  In
    that case, the TrackId is an index from a namespace associated to one
    IPv6 address of the Track Ingress node, and the Track that an IPv6
-   packet follows is signaled by the combination of the source address
 
 
 
@@ -114,6 +114,7 @@ Thubert                 Expires 11 December 2021                [Page 2]
 Internet-Draft             DetNet HbH Options                  June 2021
 
 
+   packet follows is signaled by the combination of the source address
    (of the Track Ingress node), and the TrackID placed in a RPL Option
    [RFC6553] located in an IPv6 Hop-by-Hop (HbH) Options Header [IPv6]
    in the IPv6 packet.
@@ -157,11 +158,10 @@ Internet-Draft             DetNet HbH Options                  June 2021
    same fate and resource sharing over the same Track or the same
    Traffic Engineered (TE) [RFC3272] DetNet path.
 
-
-
-
-
-
+   This document introduces new IPv6 Hop-by-Hop options that signal
+   DetNet path and sequencing information to the intermediate relays in
+   an abstract form that is independent of the transport layer.
+   Transported in IPv6 HbH Options, the DetNet information is available
 
 
 
@@ -170,10 +170,6 @@ Thubert                 Expires 11 December 2021                [Page 3]
 Internet-Draft             DetNet HbH Options                  June 2021
 
 
-   This document introduces new IPv6 Hop-by-Hop options that signal
-   DetNet path and sequencing information to the intermediate relays in
-   an abstract form that is independent of the transport layer.
-   Transported in IPv6 HbH Options, the DetNet information is available
    early in the header chain of the packet and presented and added as
    part of a service instance encapsulation by the Ingress of the DetNet
    path and accessed by the intermediate DetNet relay nodes.
@@ -191,11 +187,19 @@ Internet-Draft             DetNet HbH Options                  June 2021
 
 3.  The DetNet Options
 
-   This document defines a number of IPv6 options to be placed in a HbH
-   Options Header; the format of these options follow the generic
-   definition in section 4.2 of [IPv6].
+   This document defines new IPv6 options for DetNet to signal path and
+   a sequence to the DetNet layers.  Those options are to be placed in
+   an IPv6 HbH Options Header.  The format of the options follow the
+   generic definition in section 4.2 of [IPv6].
 
-3.1.  DetNet Sequencing Option
+   If a DetNet Path option (see Section 3.2), including the RPL Option,
+   is present in the same HbH Option Header as a DetNet Sequencing
+   Information option (see Section 3.1), then the sequencing information
+   applies to the signaled path across all flows that traverse that
+   path; else the sequencing information applies to the flow indicated
+   by the 6-tuple [RFC8938].
+
+3.1.  DetNet Sequencing Information Option
 
    A typical packet sequence can be expressed uniquely as a wrapping
    counter, represented as an unsigned integer in the option.  In that
@@ -214,10 +218,6 @@ Internet-Draft             DetNet HbH Options                  June 2021
    the sense of time at the origin node is synchronized with the rest of
    the DetNet network.
 
-   This specification also allows for an hybrid model with a coarse
-   grained packet sequence within a coarse grained time stamp.  In that
-   case, both a time stamp option and a wrapping counter options are
-   found, and the counter is used to compare packets with the same time
 
 
 
@@ -226,6 +226,10 @@ Thubert                 Expires 11 December 2021                [Page 4]
 Internet-Draft             DetNet HbH Options                  June 2021
 
 
+   This specification also allows for an hybrid model with a coarse
+   grained packet sequence within a coarse grained time stamp.  In that
+   case, both a time stamp option and a wrapping counter options are
+   found, and the counter is used to compare packets with the same time
    stamp and ignored otherwise In that case, the size of the
    representation of the counter MUST be large enough to cover at least
    3 times the number of packets that may be sent with the same value of
@@ -243,9 +247,9 @@ Internet-Draft             DetNet HbH Options                  June 2021
      |                                                               |
      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-                     Figure 1: Sequencing Option Format
+               Figure 1: Sequencing Information Option Format
 
-   Sequencing Option fields:
+   Sequencing Information Option fields:
 
    Option Type:  8-bit identifier of the type of option.  Value TBD by
       IANA; if the processing IPv6 node does not recognize the Option
@@ -259,10 +263,6 @@ Internet-Draft             DetNet HbH Options                  June 2021
 
    Sequence Type:  8-bit identifier of the type of sequencing
       information.  Value to be confirmed by IANA.
-
-
-
-
 
 
 
@@ -319,7 +319,26 @@ Internet-Draft             DetNet HbH Options                  June 2021
 
    Sequencing Information:  Variable size, as indicated in Table 1.
 
-3.2.  RPL Packet Information
+3.2.  DetNet Path Options
+
+   DetNet can leverage any of the following HbH options to signal a
+   path:
+
+   *  the RPL Option containing the RPL Packet Information (RPI)
+      [RFC6553].
+
+   *  DetNet Local Path Option Section 3.2.2.
+
+   *  DetNet Global Path Option Section 3.2.3.
+
+
+
+Thubert                 Expires 11 December 2021                [Page 6]
+
+Internet-Draft             DetNet HbH Options                  June 2021
+
+
+3.2.1.  RPL Packet Information
 
    6TiSCH [6TiSCH-ARCH] and RAW [RAW-ARCH] signal a Track using a RPL
    Option [RFC6553] with a RPLInstanceID used as TrackID.  This
@@ -329,16 +348,7 @@ Internet-Draft             DetNet HbH Options                  June 2021
    MUST be set to 0 by the originator, forwarded as-is, and ignored on
    reception.
 
-
-
-
-
-Thubert                 Expires 11 December 2021                [Page 6]
-
-Internet-Draft             DetNet HbH Options                  June 2021
-
-
-3.3.  DetNet Local Path Option
+3.2.2.  DetNet Local Path Option
 
    In complement to the RPL option, this specification defines a
    protocol-independent Local Path Identifier, which is also taken from
@@ -366,13 +376,23 @@ Internet-Draft             DetNet HbH Options                  June 2021
       local namespace associated with the IPv6 source address of the
       packet.
 
-3.4.  DetNet Global Path Option
+3.2.3.  DetNet Global Path Option
 
    The DetNet Global Path Option transports a global path identifier
    which is taken from a namespace indicated by the Origin Autonomous
    System (AS).  When the DetNet path is contained within a single AS,
    the Origin Autonomous System field can be left to 0 indicating local
    AS.
+
+
+
+
+
+
+Thubert                 Expires 11 December 2021                [Page 7]
+
+Internet-Draft             DetNet HbH Options                  June 2021
+
 
       0                   1                   2                   3
       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -385,14 +405,6 @@ Internet-Draft             DetNet HbH Options                  June 2021
                  Figure 3: DetNet Glocal Path Option Format
 
    Sequencing Option fields:
-
-
-
-
-Thubert                 Expires 11 December 2021                [Page 7]
-
-Internet-Draft             DetNet HbH Options                  June 2021
-
 
    Option Type:  8-bit identifier of the type of option.  Value TBD by
       IANA; if the processing IPv6 node does not recognize the Option
@@ -418,25 +430,13 @@ Internet-Draft             DetNet HbH Options                  June 2021
 
    This specification creates a new Subregistry for the "Sequencing Type
    of the Sequencing Option" under the "Internet Protocol Version 6
-   (IPv6) Parameters" registry.
+   (IPv6) Parameters" registry [IPV6-PARMS].
 
    *  Possible values are 8-bit unsigned integers (0..255).
 
    *  Registration procedure is "IETF Review" [RFC8126].
 
    *  Initial allocation is as Suggested in Table 2:
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -474,7 +474,7 @@ Internet-Draft             DetNet HbH Options                  June 2021
 
    This specification updates the "Destination Options and Hop-by-Hop
    Options" under the "Internet Protocol Version 6 (IPv6) Parameters"
-   registry with the (suggested) values below:
+   registry [IPV6-PARMS] with the (suggested) values below:
 
    +------+-----+-----+-------+---------------------------+-----------+
    | Hexa | act | chg | rest  | Description               | Reference |
@@ -634,6 +634,11 @@ Internet-Draft             DetNet HbH Options                  June 2021
               IEEE Standard 1588,
               <https://ieeexplore.ieee.org/document/4579760/>.
 
+   [IPV6-PARMS]
+              IANA, "Internet Protocol Version 6 (IPv6) Parameters",
+              <https://www.iana.org/assignments/ipv6-parameters/
+              ipv6-parameters.xhtml>.
+
 Author's Address
 
    Pascal Thubert (editor)
@@ -642,11 +647,6 @@ Author's Address
 
    Phone: +33 497 23 26 34
    Email: pthubert@cisco.com
-
-
-
-
-
 
 
 
