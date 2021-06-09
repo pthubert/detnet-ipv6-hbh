@@ -15,7 +15,7 @@
 <?rfc subcompact="no"?>
 <?rfc authorship="yes"?>
 <?rfc tocappendix="yes"?>
-<rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" docName="draft-pthubert-detnet-ipv6-hbh-02"
+<rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" docName="draft-pthubert-detnet-ipv6-hbh-03"
      ipr="trust200902" obsoletes="" updates="" submissionType="IETF" xml:lang="en" version="3">
   <front>
     <title abbrev="DetNet HbH Options">IPv6 Hop-by-Hop Options for DetNet</title>
@@ -50,8 +50,8 @@ RPL HbH -> TrackID
       that flow, and to transport different types of packets along the same path
       with the same treatment, e.g., Operations, Administration, and Maintenance
       packets and/or multiple flows with fate and resource sharing. This
-      document introduces new Hop-by-Hop header options that can signal that
-      information to the intermediate relays.
+      document introduces new IPv6 Hop-by-Hop options that signal that path and
+      sequencing information to the intermediate DetNet relays.
 
       </t>
     </abstract>
@@ -133,7 +133,7 @@ RPL HbH -> TrackID
   DetNet path.
 </t>
 <t>
-  This document introduces new Hop-by-Hop options that can signal DetNet path
+  This document introduces new IPv6 Hop-by-Hop options that signal DetNet path
   and sequencing information to the intermediate relays in an abstract form that
   is independent of the transport layer. Transported in IPv6 HbH Options, the
   DetNet information is available early in the header chain of the packet and
@@ -234,7 +234,12 @@ RPL HbH -> TrackID
   <dl  spacing='normal'>
 
   <dt>Option Type:</dt>
-    <dd> 8-bit identifier of the type of option. Value TBD by IANA.
+    <dd> 8-bit identifier of the type of option. Value TBD by IANA;
+    if the processing IPv6 node does not recognize the Option Type it
+    MUST skip over this option and continue processing the header (act =00);
+    the Option Data of that option cannot change en route to the packet's final
+    destination (chg=0).
+    The
     </dd>
 
 
@@ -372,7 +377,11 @@ RPL HbH -> TrackID
   <dl  spacing='normal'>
 
   <dt>Option Type:</dt>
-    <dd> 8-bit identifier of the type of option. Value TBD by IANA.
+    <dd> 8-bit identifier of the type of option. Value TBD by IANA;
+    if the processing IPv6 node does not recognize the Option Type it
+    MUST skip over this option and continue processing the header (act =00);
+    the Option Data of that option cannot change en route to the packet's final
+    destination (chg=0).
     </dd>
 
   <dt>Opt Data Len:</dt>
@@ -417,7 +426,11 @@ RPL HbH -> TrackID
   <dl  spacing='normal'>
 
   <dt>Option Type:</dt>
-    <dd> 8-bit identifier of the type of option. Value TBD by IANA.
+    <dd> 8-bit identifier of the type of option. Value TBD by IANA;
+    if the processing IPv6 node does not recognize the Option Type it
+    MUST skip over this option and continue processing the header (act =00);
+    the Option Data of that option cannot change en route to the packet's final
+    destination (chg=0).
     </dd>
 
   <dt>Opt Data Len:</dt>
