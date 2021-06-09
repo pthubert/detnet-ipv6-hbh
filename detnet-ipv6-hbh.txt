@@ -4,12 +4,12 @@
 
 DetNet                                                   P. Thubert, Ed.
 Internet-Draft                                             Cisco Systems
-Intended status: Standards Track                             8 June 2021
-Expires: 10 December 2021
+Intended status: Standards Track                             9 June 2021
+Expires: 11 December 2021
 
 
                    IPv6 Hop-by-Hop Options for DetNet
-                   draft-pthubert-detnet-ipv6-hbh-01
+                   draft-pthubert-detnet-ipv6-hbh-02
 
 Abstract
 
@@ -38,7 +38,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 10 December 2021.
+   This Internet-Draft will expire on 11 December 2021.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Thubert                 Expires 10 December 2021                [Page 1]
+Thubert                 Expires 11 December 2021                [Page 1]
 
 Internet-Draft             DetNet HbH Options                  June 2021
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Thubert                 Expires 10 December 2021                [Page 2]
+Thubert                 Expires 11 December 2021                [Page 2]
 
 Internet-Draft             DetNet HbH Options                  June 2021
 
@@ -152,33 +152,41 @@ Internet-Draft             DetNet HbH Options                  June 2021
    specifies the procedures for how IPv6 Hop-by-Hop options are
    processed to make their processing even more practical and increase
    their use in the Internet.  In that context, it makes sense to
-   consider the Hop-by-Hop Options to transport the information that is
-   relevant to DetNet, making it independant of the transport and
-   placing it early in the header chain.
-
-   The "Deterministic Networking Data Plane Framework" [RFC8938] relies
-   on the 6-tuple to identify an IPv6 flow.  But the full DetNet
-   *operations require also the capabilities to signal meta-information
-   such as a sequence within that flow, and to transport different types
-   of packets along the same path with the same treatment.  For
-   instance, it is required that Operations, Administration, and
+   consider Hop-by-Hop Options to transport the information that is
+   relevant to DetNet.
 
 
 
-Thubert                 Expires 10 December 2021                [Page 3]
+
+
+
+
+
+
+
+
+Thubert                 Expires 11 December 2021                [Page 3]
 
 Internet-Draft             DetNet HbH Options                  June 2021
 
 
+   The "Deterministic Networking Data Plane Framework" [RFC8938] relies
+   on the 6-tuple to identify an IPv6 flow.  But the full DetNet
+   operations require also the capabilities to signal meta-information
+   such as a sequence within that flow, and to transport different types
+   of packets along the same path with the same treatment.  For
+   instance, it is required that Operations, Administration, and
    Maintenance (OAM) [RFC6291] packets and/or multiple flows share the
    same fate and resource sharing over the same Track or the same
    Traffic Engineered (TE) [RFC3272] DetNet path.
 
    This document introduces new Hop-by-Hop options that can signal
-   DetNet path and sequencing information to the intermediate relays;
-   with this method, the DetNet infoirmation is available early in the
-   packet and in an abstract form that is independant of the transport
-   layer.
+   DetNet path and sequencing information to the intermediate relays in
+   an abstract form that is independent of the transport layer.
+   Transported in IPv6 HbH Options, the DetNet information is available
+   early in the header chain of the packet and presented and added as
+   part of a service instance encapsulation by the Ingress of the DetNet
+   path and accessed by the intermediate DetNet relay nodes.
 
 2.  Terminology
 
@@ -201,8 +209,8 @@ Internet-Draft             DetNet HbH Options                  June 2021
 
    A typical packet sequence can be expressed uniquely as a wrapping
    counter, represented as an unsigned integer in the option.  In that
-   case, the size of the representation MUST be large enough to cover
-   several times the upper bound on out-of-order packet delivery in
+   case, the size of the representation MUST be large enough to cover at
+   least 3 times the upper bound on out-of-order packet delivery in
    terms of number of packets.
 
    This specification also allows to use a time stamp for the packet
@@ -210,21 +218,28 @@ Internet-Draft             DetNet HbH Options                  June 2021
    accomplished by utilizing the Precision Time Protocol (PTP) format
    defined in IEEE Std. 1588 [IEEE Std. 1588] or Network Time Protocol
    (NTP) [RFC5905] formats.  In that case, the timestamp resolution at
-   the node that builds the option MUST be fine enough to ensure that
-   two consecutive packets are never stamped with the same value.
+
+
+
+Thubert                 Expires 11 December 2021                [Page 4]
+
+Internet-Draft             DetNet HbH Options                  June 2021
+
+
+   the origin node that builds the option MUST be fine enough to ensure
+   that two consecutive packets are never stamped with the same value.
+   There is no requirement for this particular stamping function that
+   the sense of time at the origin node is synchronized with the rest of
+   the DetNet network.
 
    This specification also allows for an hybrid model with a coarse
    grained packet sequence within a coarse grained time stamp.  In that
    case, both a time stamp option and a wrapping counter options are
    found, and the counter is used to compare packets with the same time
-   stamp.
-
-
-
-Thubert                 Expires 10 December 2021                [Page 4]
-
-Internet-Draft             DetNet HbH Options                  June 2021
-
+   stamp and ignored otherwise In that case, the size of the
+   representation of the counter MUST be large enough to cover at least
+   3 times the number of packets that may be sent with the same value of
+   time stamp.
 
       0                   1                   2                   3
       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -262,22 +277,7 @@ Internet-Draft             DetNet HbH Options                  June 2021
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Thubert                 Expires 10 December 2021                [Page 5]
+Thubert                 Expires 11 December 2021                [Page 5]
 
 Internet-Draft             DetNet HbH Options                  June 2021
 
@@ -333,18 +333,16 @@ Internet-Draft             DetNet HbH Options                  June 2021
 
 
 
-Thubert                 Expires 10 December 2021                [Page 6]
+Thubert                 Expires 11 December 2021                [Page 6]
 
 Internet-Draft             DetNet HbH Options                  June 2021
 
 
 3.3.  DetNet Local Path Option
 
-   This specification also allows for an hybrid model with a coarse
-   grained packet sequence within a coarse grained time stamp.  In that
-   case, both a time stamp option and a wrapping counter options are
-   found, and the counter is used to compare packets with the same time
-   stamp.
+   In complement to the RPL option, this specification defines a
+   protocol-independent Local Path Identifier, which is also taken from
+   a namespace indicated by the IPv6 source address of the packet.
 
       0                   1                   2                   3
       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -367,11 +365,11 @@ Internet-Draft             DetNet HbH Options                  June 2021
 
 3.4.  DetNet Global Path Option
 
-   This specification also allows for an hybrid model with a coarse
-   grained packet sequence within a coarse grained time stamp.  In that
-   case, both a time stamp option and a wrapping counter options are
-   found, and the counter is used to compare packets with the same time
-   stamp.
+   The DetNet Global Path Option transports a global path identifier
+   which is taken from a namespace indicated by the Origin Autonomous
+   System (AS).  When the DetNet path is contained within a single AS,
+   the Origin Autonomous System field can be left to 0 indicating local
+   AS.
 
       0                   1                   2                   3
       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -386,15 +384,15 @@ Internet-Draft             DetNet HbH Options                  June 2021
    Sequencing Option fields:
 
    Option Type:  8-bit identifier of the type of option.  Value TBD by
+      IANA.
 
 
 
-Thubert                 Expires 10 December 2021                [Page 7]
+
+Thubert                 Expires 11 December 2021                [Page 7]
 
 Internet-Draft             DetNet HbH Options                  June 2021
 
-
-      IANA.
 
    Opt Data Len:  8-bit length of the option data, set to 6.
 
@@ -445,7 +443,9 @@ Internet-Draft             DetNet HbH Options                  June 2021
 
 
 
-Thubert                 Expires 10 December 2021                [Page 8]
+
+
+Thubert                 Expires 11 December 2021                [Page 8]
 
 Internet-Draft             DetNet HbH Options                  June 2021
 
@@ -501,7 +501,7 @@ Internet-Draft             DetNet HbH Options                  June 2021
 
 
 
-Thubert                 Expires 10 December 2021                [Page 9]
+Thubert                 Expires 11 December 2021                [Page 9]
 
 Internet-Draft             DetNet HbH Options                  June 2021
 
@@ -557,4 +557,4 @@ Author's Address
 
 
 
-Thubert                 Expires 10 December 2021               [Page 10]
+Thubert                 Expires 11 December 2021               [Page 10]

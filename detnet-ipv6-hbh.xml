@@ -118,7 +118,7 @@ RPL HbH -> TrackID
   Processing Procedures"</xref> further specifies the procedures for how IPv6
   Hop-by-Hop options are processed to make their processing even more practical
   and increase their use in the Internet. In that context, it makes sense to
-  consider the Hop-by-Hop Options to transport the information that is relevant
+  consider Hop-by-Hop Options to transport the information that is relevant
   to DetNet.
 </t>
 <t>
@@ -134,11 +134,11 @@ RPL HbH -> TrackID
 </t>
 <t>
   This document introduces new Hop-by-Hop options that can signal DetNet path
-  and sequencing information to the intermediate relays; with this method, the
-  DetNet information is available early in eh header chain of the packet and
-  presented in an abstract form that is independant of the transport layer and
-  can be added as part of a serive instance encapsulation by the Ingress of the
-  DetNet path.
+  and sequencing information to the intermediate relays in an abstract form that
+  is independent of the transport layer. Transported in IPv6 HbH Options, the
+  DetNet information is available early in the header chain of the packet and
+  presented and added as part of a service instance encapsulation by the Ingress
+  of the DetNet path and accessed by the intermediate DetNet relay nodes.
 </t>
 
 
@@ -189,7 +189,7 @@ RPL HbH -> TrackID
    <t>
    A typical packet sequence can be expressed uniquely as a wrapping counter,
    represented as an unsigned integer in the option. In that case, the size of
-   the representation MUST be large enough to cover several times the upper
+   the representation MUST be large enough to cover at least 3 times the upper
    bound on out-of-order packet delivery in terms of number of packets.
    </t>
    <t>
@@ -198,15 +198,20 @@ RPL HbH -> TrackID
    This can be accomplished by utilizing the Precision Time Protocol (PTP)
    format defined in IEEE Std. 1588 <xref target="IEEEstd1588" format="default"/>
    or Network Time Protocol (NTP) <xref target="RFC5905"/> formats.
-   In that case, the timestamp resolution at the node that builds the option
+   In that case, the timestamp resolution at the origin node that builds the option
    MUST be fine enough to ensure that two consecutive packets are never stamped
-   with the same value.
+   with the same value. There is no requirement for this particular stamping
+   function that the sense of time at the origin node is synchronized with the
+   rest of the DetNet network.
    </t>
    <t>
    This specification also allows for an hybrid model with a coarse grained
    packet sequence within a coarse grained time stamp. In that case, both a
    time stamp option and a wrapping counter options are found, and the counter
-   is used to compare packets with the same time stamp.
+   is used to compare packets with the same time stamp and ignored otherwise
+   In that case, the size of the representation of the counter MUST be large
+   enough to cover at least 3 times the number of packets that may be sent with
+   the same value of time stamp.
     </t>
 <figure anchor='seqo-fmt'><name>Sequencing Option Format</name>
               <artwork align="center">
@@ -329,10 +334,9 @@ RPL HbH -> TrackID
 
 
    <t>
-   This specification also allows for an hybrid model with a coarse grained
-   packet sequence within a coarse grained time stamp. In that case, both a
-   time stamp option and a wrapping counter options are found, and the counter
-   is used to compare packets with the same time stamp.
+   In complement to the RPL option, this specification defines a
+   protocol-independent Local Path Identifier, which is also taken from
+   a namespace indicated by the IPv6 source address of the packet.
     </t>
 <figure anchor='patho-fmt'><name>DetNet Local Path Option Format</name>
               <artwork align="center">
@@ -367,16 +371,15 @@ RPL HbH -> TrackID
 
 
    <section anchor="gpatho" numbered="true" toc="default">
-      <name>DetNet  Global Path Option</name>
+      <name>DetNet Global Path Option</name>
 
     <!--  2222222222222222    -->
 
-
    <t>
-   This specification also allows for an hybrid model with a coarse grained
-   packet sequence within a coarse grained time stamp. In that case, both a
-   time stamp option and a wrapping counter options are found, and the counter
-   is used to compare packets with the same time stamp.
+   The DetNet Global Path Option transports a global path identifier which is
+   taken from a namespace indicated by the Origin Autonomous System (AS). When
+   the DetNet path is contained within a single AS, the Origin Autonomous System
+   field can be left to 0 indicating local AS.
     </t>
 <figure anchor='gpatho-fmt'><name>DetNet Glocal Path Option Format</name>
               <artwork align="center">
