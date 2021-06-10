@@ -51,7 +51,7 @@ RPL HbH -> TrackID
       with the same treatment, e.g., Operations, Administration, and Maintenance
       packets and/or multiple flows with fate and resource sharing. This
       document introduces new IPv6 Hop-by-Hop options that signal that path and
-      sequencing information to the intermediate DetNet relays.
+      redundancy information to the intermediate DetNet relays.
 
       </t>
     </abstract>
@@ -134,7 +134,7 @@ RPL HbH -> TrackID
 </t>
 <t>
   This document introduces new IPv6 Hop-by-Hop options that signal DetNet path
-  and sequencing information to the intermediate relays in an abstract form that
+  and Redundancy information to the intermediate relays in an abstract form that
   is independent of the transport layer. Transported in IPv6 HbH Options, the
   DetNet information is available early in the header chain of the packet and
   presented and added as part of a service instance encapsulation by the Ingress
@@ -178,17 +178,17 @@ RPL HbH -> TrackID
 
    <t>
    If a DetNet Path option (see <xref target="detnetpatho"/>), including the RPL
-   Option, is present in the same HbH Option Header as a DetNet Sequencing
-   Information option (see <xref target="seqo"/>), then the sequencing
+   Option, is present in the same HbH Option Header as a DetNet Redundancy
+   Information option (see <xref target="seqo"/>), then the redundancy
    information applies to the signaled path across all flows that traverse that
-   path; else the sequencing information applies to the flow indicated by the
+   path; else the redundancy information applies to the flow indicated by the
    6-tuple <xref target='RFC8938'/>.
    </t>
     <!--  1111111111111111    -->
 
 
    <section anchor="seqo" numbered="true" toc="default">
-      <name>DetNet Sequencing Information Option</name>
+      <name>DetNet Redundancy Information Option</name>
 
     <!--  2222222222222222    -->
 
@@ -198,14 +198,23 @@ RPL HbH -> TrackID
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
 -->
    <t>
+   The DetNet Redundancy Information Option helps discriminate copies of a same
+   packet vs. different packets, and is useful for Service-layer Packet
+   Replication Elimination and Ordering Functions (PREOF). The typical
+   expression redundancy information is a sequence counter, but it is not the
+   only way to identify a packet. It is also possible that a packet is divided
+   in elements such as network-coded fragments. In that case, the pieces are
+   discriminated with an opaque 8-bit fragment tag.
+   </t>
+   <t>
    A typical packet sequence can be expressed uniquely as a wrapping counter,
    represented as an unsigned integer in the option. In that case, the size of
    the representation MUST be large enough to cover at least 3 times the upper
    bound on out-of-order packet delivery in terms of number of packets.
    </t>
    <t>
-   This specification also allows to use a time stamp for the packet sequencing
-   following the recommendations in <xref target="RFC8877"/>.
+   This specification also allows to use a time stamp for the packet redundancy
+   information, in conformance with the recommendations in <xref target="RFC8877"/>.
    This can be accomplished by utilizing the Precision Time Protocol (PTP)
    format defined in IEEE Std. 1588 <xref target="IEEEstd1588" format="default"/>
    or Network Time Protocol (NTP) <xref target="RFC5905"/> formats.
@@ -216,6 +225,17 @@ RPL HbH -> TrackID
    rest of the DetNet network.
    </t>
    <t>
+   IEEEE TSN <xref target='IEEE8021TSN'/> defined a redundancy tag (R-Tag) for
+   the IEEE Std. 802.1CB Frame Replication and Elimination for Reliability (FRER).
+   The R-Tag is a structured field and its content is subject to evolve; but the
+   expectation for this specification is that the overall size remains 48 bits
+   and that the 48-bit value is different for a large number of contiguous frames.
+   When transporting TSN frames in a DetNet packet, it is possible to leverage
+   the R-Tag as Redundancy information, though it cannot be assumed that the
+   R-Tag is sequentially incremented; so it can be used for packet duplicate
+   elimination but it is not suitable not for packet re-ordering.
+   </t>
+   <t>
    This specification also allows for an hybrid model with a coarse grained
    packet sequence within a coarse grained time stamp. In that case, both a
    time stamp option and a wrapping counter options are found, and the counter
@@ -224,16 +244,16 @@ RPL HbH -> TrackID
    enough to cover at least 3 times the number of packets that may be sent with
    the same value of time stamp.
    </t>
-<figure anchor='seqo-fmt'><name>Sequencing Information Option Format</name>
+<figure anchor='seqo-fmt'><name>Redundancy Information Option Format</name>
               <artwork align="center">
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|  Option Type  |  Opt Data Len |   Seq. Type   |    Reserved   |
+|  Option Type  |  Opt Data Len |   Seq. Type   | Fragment Tag  |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                                                               |
 .                                                               .
-.          Sequencing Information (variable Size)               .
+.          Redundancy Information (variable Size)               .
 .                                                               .
 |                                                               |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -241,7 +261,7 @@ RPL HbH -> TrackID
 </figure>
 
 
-  <t> Sequencing Information Option fields:</t>
+  <t> Redundancy Information Option fields:</t>
   <dl  spacing='normal'>
 
   <dt>Option Type:</dt>
@@ -259,13 +279,16 @@ RPL HbH -> TrackID
     </dd>
 
 
-  <dt>Reserved:</dt>
-    <dd> <t>8-bit field, set to 0 and ignored on reception.</t>
+  <dt>Fragment Tag:</dt>
+    <dd> <t>8-bit field, set to 0 when the packet is sent in entirety;
+    packets with the same Redundancy Information and different fragments tags
+    MUST be considered as different by the elimination function and are not
+    subject to ordering based on the Tag.</t>
     </dd>
 
 
   <dt>Sequence Type:</dt>
-    <dd> <t>8-bit identifier of the type of sequencing information.
+    <dd> <t>8-bit identifier of the type of Redundancy information.
     Value to be confirmed by IANA.</t>
 
         <table anchor="seqo-seqt"><name>Sequence Type values (suggested)</name>
@@ -274,7 +297,7 @@ RPL HbH -> TrackID
           <tr><th align='center'> Seq. Type Value</th>
               <th align='left'>Category</th>
               <th align='left'>Common Name</th>
-              <th align='left'>Sequencing Information Format</th></tr>
+              <th align='left'>Redundancy Information Format</th></tr>
 
    </thead>
    <tbody>
@@ -319,6 +342,10 @@ RPL HbH -> TrackID
               <td align='left'>PTP 64-bit Truncated Timestamp Format, see
               section 4.3. of <xref target="RFC8877"/></td></tr>
 
+          <tr><td align='center'>24</td>
+              <th align='left'>Structured Unique Tag</th>
+              <td align='left'>TSN Redundancy Tag</td>
+              <td align='left'>48-bit opaque</td></tr>
 
 
     </tbody>
@@ -327,7 +354,7 @@ RPL HbH -> TrackID
     </dd>
 
 
-  <dt>Sequencing Information:</dt>
+  <dt>Redundancy Information:</dt>
     <dd> <t>Variable size, as indicated in <xref target="seqo-seqt"/>.</t>
 
     </dd>
@@ -336,7 +363,7 @@ RPL HbH -> TrackID
     </dl>
 
     </section>
-    <!-- DetNet Sequencing Option -->
+    <!-- DetNet Redundancy Option -->
     <!--  1111111111111111    -->
 
 
@@ -386,6 +413,19 @@ RPL HbH -> TrackID
    In complement to the RPL option, this specification defines a
    protocol-independent Local Path Identifier, which is also taken from
    a namespace indicated by the IPv6 source address of the packet.
+   </t>
+   <t>
+   The DetNet Local Path Option is to be used in a limited domain and all
+   routers along the path are expected to support the option. The intention is
+   that if a packet escapes the local domain, a router that does not support the
+   option will intercept it and return an ICMP error.code 2 pointing at the
+   offset of the DetNet Local Path Option.
+   </t>
+   <t>
+   An intermediate router that supports the DetNet Local Path Option but is
+   missing the necessary state to forward along the indicated path must drop the
+   packet and return an ICMP error.code 0 pointing at the offset of the
+   Local Path ID in the DetNet Local Path Option.
     </t>
 <figure anchor='patho-fmt'><name>DetNet Local Path Option Format</name>
               <artwork align="center">
@@ -398,13 +438,14 @@ RPL HbH -> TrackID
 </figure>
 
 
-  <t> Sequencing Option fields:</t>
+  <t> Redundancy Option fields:</t>
   <dl  spacing='normal'>
 
   <dt>Option Type:</dt>
     <dd> 8-bit identifier of the type of option. Value TBD by IANA;
     if the processing IPv6 node does not recognize the Option Type it
-    MUST skip over this option and continue processing the header (act =00);
+    must discard the packet and send an ICMP Parameter Problem, Code 2, message
+    to the packet's Source Address (act =10);
     the Option Data of that option cannot change en route to the packet's final
     destination (chg=0).
     </dd>
@@ -433,6 +474,17 @@ RPL HbH -> TrackID
    the DetNet path is contained within a single AS, the Origin Autonomous System
    field can be left to 0 indicating local AS.
     </t>
+   <t>
+   The DetNet Global Path Option is to be used to signal a path that may be
+   loose and may exceed the boundaries of a local domain; a portion of the hops
+   may traverse routers in the wider internet that will not leverage the option
+   and are expected to ignore it.
+   </t>
+   <t>
+   An intermediate router that supports the DetNet Global Path Option but is
+   missing the necessary state to forward along the indicated path must ignore
+   the DetNet global Path Option.
+   </t>
 <figure anchor='gpatho-fmt'><name>DetNet Glocal Path Option Format</name>
               <artwork align="center">
  0                   1                   2                   3
@@ -446,7 +498,7 @@ RPL HbH -> TrackID
 </figure>
 
 
-  <t> Sequencing Option fields:</t>
+  <t> Redundancy Option fields:</t>
   <dl  spacing='normal'>
 
   <dt>Option Type:</dt>
@@ -501,10 +553,10 @@ RPL HbH -> TrackID
       <name>IANA Considerations</name>
 
     <section anchor="iana-st" numbered="true" toc="default">
-      <name>New Subregistry for the Sequencing Type</name>
+      <name>New Subregistry for the Redundancy Type</name>
 <t>
-	This specification creates a new Subregistry for the "Sequencing Type of the
-    Sequencing Option" under the "Internet Protocol Version 6 (IPv6) Parameters"
+	This specification creates a new Subregistry for the "Redundancy Type of the
+    Redundancy Option" under the "Internet Protocol Version 6 (IPv6) Parameters"
     registry <xref target ="IPV6-PARMS"/>.
 </t>
 <ul spacing='normal'>
@@ -533,6 +585,7 @@ RPL HbH -> TrackID
               <td align='left'>RPL Sequence Counter</td>
               <td align='left'>THIS RFC</td></tr>
 
+
           <tr><td align='center'>11</td>
               <td align='left'>Fractional NTP time stamp</td>
               <td align='left'>THIS RFC</td></tr>
@@ -550,10 +603,14 @@ RPL HbH -> TrackID
               <td align='left'>Short PTP time stamp</td>
               <td align='left'>THIS RFC</td></tr>
 
+
+          <tr><td align='center'>24</td>
+              <td align='left'>TSN Redundancy Tag</td>
+              <td align='left'>THIS RFC</td></tr>
    </tbody>
 
    </table>
-</section> <!-- New Subregistry for the Sequencing Type -->
+</section> <!-- New Subregistry for the Redundancy Type -->
 
 
     <section anchor="iana-hbho" numbered="true" toc="default">
@@ -571,10 +628,10 @@ RPL HbH -> TrackID
    <tbody>
           <tr><td align='center'>0x12</td>
               <td>00</td><td>0</td><td>10010</td>
-              <td>DetNet Sequencing Option</td>
+              <td>DetNet Redundancy Option</td>
               <td>THIS RFC</td></tr>
           <tr><td align='center'>0x13</td>
-              <td>00</td><td>0</td><td>10011</td>
+              <td>10</td><td>0</td><td>10011</td>
               <td>DetNet Local Path Option</td>
               <td>THIS RFC</td></tr>
           <tr><td align='center'>0x14</td>
