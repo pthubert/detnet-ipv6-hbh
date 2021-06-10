@@ -134,11 +134,12 @@ RPL HbH -> TrackID
 </t>
 <t>
   This document introduces new IPv6 Hop-by-Hop options that signal DetNet path
-  and Redundancy information to the intermediate relays in an abstract form that
+  and redundancy information to the intermediate relays in an abstract form that
   is independent of the transport layer. Transported in IPv6 HbH Options, the
   DetNet information is available early in the header chain of the packet and
-  presented and added as part of a service instance encapsulation by the Ingress
-  of the DetNet path and accessed by the intermediate DetNet relay nodes.
+  can be added by a service instance as part of the encapsulation by the Ingress
+  of the DetNet path. It can then be accessed by the intermediate DetNet routers
+  without the need of a deep packet inspection (e.g., beyond UDP).
 </t>
 
 
@@ -379,9 +380,9 @@ RPL HbH -> TrackID
    <ul>
    <li>the RPL Option containing the RPL Packet Information (RPI) <xref target="RFC6553"/>.
    </li>
-   <li>DetNet Local Path Option  <xref target="dpatho"/>.
+   <li>DetNet Strict Path Option  <xref target="dpatho"/>.
    </li>
-   <li>DetNet Global Path Option <xref target="gpatho"/>.
+   <li>DetNet Loose Path Option <xref target="gpatho"/>.
    </li>
    </ul>
    <section anchor="rplo" numbered="true" toc="default">
@@ -409,33 +410,33 @@ RPL HbH -> TrackID
 
 
    <section anchor="dpatho" numbered="true" toc="default">
-      <name>DetNet Local Path Option</name>
+      <name>DetNet Strict Path Option</name>
 
 
    <t>
    In complement to the RPL option, this specification defines a
-   protocol-independent Local Path Identifier, which is also taken from
+   protocol-independent Strict Path Identifier, which is also taken from
    a namespace indicated by the IPv6 source address of the packet.
    </t>
    <t>
-   The DetNet Local Path Option is to be used in a limited domain and all
+   The DetNet Strict Path Option is to be used in a limited domain and all
    routers along the path are expected to support the option. The intention is
    that if a packet escapes the local domain, a router that does not support the
    option will intercept it and return an ICMP error.code 2 pointing at the
-   offset of the DetNet Local Path Option.
+   offset of the DetNet Strict Path Option.
    </t>
    <t>
-   An intermediate router that supports the DetNet Local Path Option but is
+   An intermediate router that supports the DetNet Strict Path Option but is
    missing the necessary state to forward along the indicated path must drop the
    packet and return an ICMP error.code 0 pointing at the offset of the
-   Local Path ID in the DetNet Local Path Option.
+   Strict Path ID in the DetNet Strict Path Option.
     </t>
-<figure anchor='patho-fmt'><name>DetNet Local Path Option Format</name>
+<figure anchor='patho-fmt'><name>DetNet Strict Path Option Format</name>
               <artwork align="center">
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|  Option Type  |  Opt Data Len |    Local Path ID              |
+|  Option Type  |  Opt Data Len |    Strict Path ID              |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  </artwork>
 </figure>
@@ -457,7 +458,7 @@ RPL HbH -> TrackID
     <dd> <t>8-bit length of the option data, set to 2.</t>
     </dd>
 
-  <dt>Local Path ID:</dt>
+  <dt>Strict Path ID:</dt>
     <dd> <t>16-bit identifier of the DetNet Path, taken from a local
    namespace associated with the IPv6 source address of the packet.</t>
     </dd>
@@ -468,34 +469,34 @@ RPL HbH -> TrackID
 
     <!--  2222222222222222    -->
    <section anchor="gpatho" numbered="true" toc="default">
-      <name>DetNet Global Path Option</name>
+      <name>DetNet Loose Path Option</name>
 
 
    <t>
-   The DetNet Global Path Option transports a global path identifier which is
+   The DetNet Loose Path Option transports a Loose Path identifier which is
    taken from a namespace indicated by the Origin Autonomous System (AS). When
    the DetNet path is contained within a single AS, the Origin Autonomous System
    field can be left to 0 indicating local AS.
     </t>
    <t>
-   The DetNet Global Path Option is to be used to signal a path that may be
+   The DetNet Loose Path Option is to be used to signal a path that may be
    loose and may exceed the boundaries of a local domain; a portion of the hops
    may traverse routers in the wider internet that will not leverage the option
    and are expected to ignore it.
    </t>
    <t>
-   An intermediate router that supports the DetNet Global Path Option but is
+   An intermediate router that supports the DetNet Loose Path Option but is
    missing the necessary state to forward along the indicated path must ignore
-   the DetNet global Path Option.
+   the DetNet Loose Path Option.
    </t>
-<figure anchor='gpatho-fmt'><name>DetNet Glocal Path Option Format</name>
+<figure anchor='gpatho-fmt'><name>DetNet GStrict Path Option Format</name>
               <artwork align="center">
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |  Option Type  |  Opt Data Len |   Origin Autonomous System    |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                          Global Path ID                       |
+|                          Loose Path ID                       |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  </artwork>
 </figure>
@@ -521,7 +522,7 @@ RPL HbH -> TrackID
     path.
     </t>
     </dd>
-  <dt>Global Path ID:</dt>
+  <dt>Loose Path ID:</dt>
     <dd> <t>32-bit identifier of the DetNet Path, taken from a local
    namespace associated with the origin AS of the DetNet path. The value
    of 0 signals a DetNet path that is constrained within the local AS or the
@@ -529,7 +530,7 @@ RPL HbH -> TrackID
     </dd>
   </dl>
     </section>
-    <!-- DetNet Global Path Option -->
+    <!-- DetNet Loose Path Option -->
     <!--  222222222222222    -->
     </section>
     <!-- DetNet Path Options -->
@@ -635,11 +636,11 @@ RPL HbH -> TrackID
               <td>THIS RFC</td></tr>
           <tr><td align='center'>0x93</td>
               <td>10</td><td>0</td><td>10011</td>
-              <td>DetNet Local Path Option</td>
+              <td>DetNet Strict Path Option</td>
               <td>THIS RFC</td></tr>
           <tr><td align='center'>0x14</td>
               <td>00</td><td>0</td><td>10100</td>
-              <td>DetNet Global Path Option</td>
+              <td>DetNet Loose Path Option</td>
               <td>THIS RFC</td></tr>
 
    </tbody>

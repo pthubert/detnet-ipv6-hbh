@@ -70,8 +70,8 @@ Table of Contents
      3.1.  DetNet Redundancy Information Option  . . . . . . . . . .   4
      3.2.  DetNet Path Options . . . . . . . . . . . . . . . . . . .   7
        3.2.1.  RPL Packet Information  . . . . . . . . . . . . . . .   8
-       3.2.2.  DetNet Local Path Option  . . . . . . . . . . . . . .   8
-       3.2.3.  DetNet Global Path Option . . . . . . . . . . . . . .   9
+       3.2.2.  DetNet Strict Path Option . . . . . . . . . . . . . .   8
+       3.2.3.  DetNet Loose Path Option  . . . . . . . . . . . . . .   9
    4.  Security Considerations . . . . . . . . . . . . . . . . . . .  10
    5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  10
      5.1.  New Subregistry for the Redundancy Type . . . . . . . . .  10
@@ -159,7 +159,7 @@ Internet-Draft             DetNet HbH Options                  June 2021
    Traffic Engineered (TE) [RFC3272] DetNet path.
 
    This document introduces new IPv6 Hop-by-Hop options that signal
-   DetNet path and Redundancy information to the intermediate relays in
+   DetNet path and redundancy information to the intermediate relays in
    an abstract form that is independent of the transport layer.
    Transported in IPv6 HbH Options, the DetNet information is available
 
@@ -170,9 +170,10 @@ Thubert                 Expires 12 December 2021                [Page 3]
 Internet-Draft             DetNet HbH Options                  June 2021
 
 
-   early in the header chain of the packet and presented and added as
-   part of a service instance encapsulation by the Ingress of the DetNet
-   path and accessed by the intermediate DetNet relay nodes.
+   early in the header chain of the packet and can be added by a service
+   instance as part of the encapsulation by the Ingress of the DetNet
+   path.  It can then be accessed by the intermediate DetNet routers
+   without the need of a deep packet inspection (e.g., beyond UDP).
 
 2.  Terminology
 
@@ -210,6 +211,21 @@ Internet-Draft             DetNet HbH Options                  June 2021
    In that case, the pieces are discriminated with an opaque 8-bit
    fragment tag.
 
+
+
+
+
+
+
+
+
+
+
+Thubert                 Expires 12 December 2021                [Page 4]
+
+Internet-Draft             DetNet HbH Options                  June 2021
+
+
    A packet sequence can be expressed uniquely as a wrapping counter,
    represented as an unsigned integer in the option.  In that case, the
    size of the representation MUST be large enough to cover at least 3
@@ -218,13 +234,6 @@ Internet-Draft             DetNet HbH Options                  June 2021
    in another protocol, and it is possible that the value 0 is reserved
    when wrapping, to the option offers both possibilities, wrapping to
    either 0 or to 1.
-
-
-
-Thubert                 Expires 12 December 2021                [Page 4]
-
-Internet-Draft             DetNet HbH Options                  June 2021
-
 
    This specification also allows to use a time stamp for the packet
    redundancy information, in conformance with the recommendations in
@@ -257,6 +266,22 @@ Internet-Draft             DetNet HbH Options                  June 2021
    3 times the number of packets that may be sent with the same value of
    time stamp.
 
+
+
+
+
+
+
+
+
+
+
+
+Thubert                 Expires 12 December 2021                [Page 5]
+
+Internet-Draft             DetNet HbH Options                  June 2021
+
+
       0                   1                   2                   3
       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -274,14 +299,6 @@ Internet-Draft             DetNet HbH Options                  June 2021
    Redundancy Information Option fields:
 
    Option Type:  8-bit identifier of the type of option.  Value TBD by
-
-
-
-Thubert                 Expires 12 December 2021                [Page 5]
-
-Internet-Draft             DetNet HbH Options                  June 2021
-
-
       IANA; if the processing IPv6 node does not recognize the Option
       Type it MUST skip over this option and continue processing the
       header (act =00); the Option Data of that option cannot change en
@@ -297,23 +314,6 @@ Internet-Draft             DetNet HbH Options                  June 2021
 
    Redundancy Information Type:  8-bit identifier of the type of
       Redundancy information.  Value to be confirmed by IANA.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -397,9 +397,9 @@ Internet-Draft             DetNet HbH Options                  June 2021
    *  the RPL Option containing the RPL Packet Information (RPI)
       [RFC6553].
 
-   *  DetNet Local Path Option Section 3.2.2.
+   *  DetNet Strict Path Option Section 3.2.2.
 
-   *  DetNet Global Path Option Section 3.2.3.
+   *  DetNet Loose Path Option Section 3.2.3.
 
 3.2.1.  RPL Packet Information
 
@@ -411,30 +411,30 @@ Internet-Draft             DetNet HbH Options                  June 2021
    MUST be set to 0 by the originator, forwarded as-is, and ignored on
    reception.
 
-3.2.2.  DetNet Local Path Option
+3.2.2.  DetNet Strict Path Option
 
    In complement to the RPL option, this specification defines a
-   protocol-independent Local Path Identifier, which is also taken from
+   protocol-independent Strict Path Identifier, which is also taken from
    a namespace indicated by the IPv6 source address of the packet.
 
-   The DetNet Local Path Option is to be used in a limited domain and
+   The DetNet Strict Path Option is to be used in a limited domain and
    all routers along the path are expected to support the option.  The
    intention is that if a packet escapes the local domain, a router that
    does not support the option will intercept it and return an ICMP
-   error.code 2 pointing at the offset of the DetNet Local Path Option.
+   error.code 2 pointing at the offset of the DetNet Strict Path Option.
 
-   An intermediate router that supports the DetNet Local Path Option but
-   is missing the necessary state to forward along the indicated path
-   must drop the packet and return an ICMP error.code 0 pointing at the
-   offset of the Local Path ID in the DetNet Local Path Option.
+   An intermediate router that supports the DetNet Strict Path Option
+   but is missing the necessary state to forward along the indicated
+   path must drop the packet and return an ICMP error.code 0 pointing at
+   the offset of the Strict Path ID in the DetNet Strict Path Option.
 
-      0                   1                   2                   3
-      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-     |  Option Type  |  Opt Data Len |    Local Path ID              |
-     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |  Option Type  |  Opt Data Len |    Strict Path ID              |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-                 Figure 2: DetNet Local Path Option Format
+                 Figure 2: DetNet Strict Path Option Format
 
    Redundancy Option fields:
 
@@ -458,36 +458,35 @@ Internet-Draft             DetNet HbH Options                  June 2021
 
    Opt Data Len:  8-bit length of the option data, set to 2.
 
-   Local Path ID:  16-bit identifier of the DetNet Path, taken from a
+   Strict Path ID:  16-bit identifier of the DetNet Path, taken from a
       local namespace associated with the IPv6 source address of the
       packet.
 
-3.2.3.  DetNet Global Path Option
+3.2.3.  DetNet Loose Path Option
 
-   The DetNet Global Path Option transports a global path identifier
-   which is taken from a namespace indicated by the Origin Autonomous
-   System (AS).  When the DetNet path is contained within a single AS,
-   the Origin Autonomous System field can be left to 0 indicating local
-   AS.
+   The DetNet Loose Path Option transports a Loose Path identifier which
+   is taken from a namespace indicated by the Origin Autonomous System
+   (AS).  When the DetNet path is contained within a single AS, the
+   Origin Autonomous System field can be left to 0 indicating local AS.
 
-   The DetNet Global Path Option is to be used to signal a path that may
+   The DetNet Loose Path Option is to be used to signal a path that may
    be loose and may exceed the boundaries of a local domain; a portion
    of the hops may traverse routers in the wider internet that will not
    leverage the option and are expected to ignore it.
 
-   An intermediate router that supports the DetNet Global Path Option
-   but is missing the necessary state to forward along the indicated
-   path must ignore the DetNet global Path Option.
+   An intermediate router that supports the DetNet Loose Path Option but
+   is missing the necessary state to forward along the indicated path
+   must ignore the DetNet Loose Path Option.
 
       0                   1                   2                   3
       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
      |  Option Type  |  Opt Data Len |   Origin Autonomous System    |
      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-     |                          Global Path ID                       |
+     |                          Loose Path ID                       |
      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-                 Figure 3: DetNet Glocal Path Option Format
+                Figure 3: DetNet GStrict Path Option Format
 
    Redundancy Option fields:
 
@@ -501,6 +500,7 @@ Internet-Draft             DetNet HbH Options                  June 2021
 
 
 
+
 Thubert                 Expires 12 December 2021                [Page 9]
 
 Internet-Draft             DetNet HbH Options                  June 2021
@@ -509,7 +509,7 @@ Internet-Draft             DetNet HbH Options                  June 2021
    Origin Autonomous System:  16-bit identifier of the Autonomous
       Systems (AS) that originates the path.
 
-   Global Path ID:  32-bit identifier of the DetNet Path, taken from a
+   Loose Path ID:  32-bit identifier of the DetNet Path, taken from a
       local namespace associated with the origin AS of the DetNet path.
       The value of 0 signals a DetNet path that is constrained within
       the local AS or the local administrative DetNet domain.
@@ -574,10 +574,10 @@ Internet-Draft             DetNet HbH Options                  June 2021
        | 0x12 | 00  | 0   | 10010 | DetNet Redundancy  | THIS RFC  |
        |      |     |     |       | Information Option |           |
        +------+-----+-----+-------+--------------------+-----------+
-       | 0x13 | 10  | 0   | 10011 | DetNet Local Path  | THIS RFC  |
+       | 0x93 | 10  | 0   | 10011 | DetNet Strict Path | THIS RFC  |
        |      |     |     |       | Option             |           |
        +------+-----+-----+-------+--------------------+-----------+
-       | 0x14 | 00  | 0   | 10100 | DetNet Global Path | THIS RFC  |
+       | 0x14 | 00  | 0   | 10100 | DetNet Loose Path  | THIS RFC  |
        |      |     |     |       | Option             |           |
        +------+-----+-----+-------+--------------------+-----------+
 
