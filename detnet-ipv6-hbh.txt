@@ -210,14 +210,14 @@ Internet-Draft             DetNet HbH Options                  June 2021
    In that case, the pieces are discriminated with an opaque 8-bit
    fragment tag.
 
-   A typical packet sequence can be expressed uniquely as a wrapping
-   counter, represented as an unsigned integer in the option.  In that
-   case, the size of the representation MUST be large enough to cover at
-   least 3 times the upper bound on out-of-order packet delivery in
-   terms of number of packets.
-
-
-
+   A packet sequence can be expressed uniquely as a wrapping counter,
+   represented as an unsigned integer in the option.  In that case, the
+   size of the representation MUST be large enough to cover at least 3
+   times the upper bound on out-of-order packet delivery in terms of
+   number of packets.  The sequence counter may be copied from a field
+   in another protocol, and it is possible that the value 0 is reserved
+   when wrapping, to the option offers both possibilities, wrapping to
+   either 0 or to 1.
 
 
 
@@ -260,7 +260,7 @@ Internet-Draft             DetNet HbH Options                  June 2021
       0                   1                   2                   3
       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-     |  Option Type  |  Opt Data Len |   Seq. Type   | Fragment Tag  |
+     |  Option Type  |  Opt Data Len |  R.I. Type    | Fragment Tag  |
      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
      |                                                               |
      .                                                               .
@@ -295,8 +295,8 @@ Internet-Draft             DetNet HbH Options                  June 2021
       elimination function and are not subject to ordering based on the
       Tag.
 
-   Sequence Type:  8-bit identifier of the type of Redundancy
-      information.  Value to be confirmed by IANA.
+   Redundancy Information Type:  8-bit identifier of the type of
+      Redundancy information.  Value to be confirmed by IANA.
 
 
 
@@ -377,7 +377,7 @@ Internet-Draft             DetNet HbH Options                  June 2021
       |       |            | Tag           |                           |
       +-------+============+---------------+---------------------------+
 
-                  Table 1: Sequence Type values (suggested)
+           Table 1: Redundancy Information Type values (suggested)
 
    Redundancy Information:  Variable size, as indicated in Table 1.
 
@@ -550,7 +550,7 @@ Internet-Draft             DetNet HbH Options                  June 2021
      |        24       | TSN Redundancy Tag             | THIS RFC  |
      +-----------------+--------------------------------+-----------+
 
-                      Table 2: Sequence Type values
+               Table 2: Redundancy Information Type values
 
 
 
@@ -568,17 +568,20 @@ Internet-Draft             DetNet HbH Options                  June 2021
    Options" under the "Internet Protocol Version 6 (IPv6) Parameters"
    registry [IPV6-PARMS] with the (suggested) values below:
 
-   +------+-----+-----+-------+---------------------------+-----------+
-   | Hexa | act | chg | rest  | Description               | Reference |
-   +------+-----+-----+-------+---------------------------+-----------+
-   | 0x12 | 00  | 0   | 10010 | DetNet Redundancy Option  | THIS RFC  |
-   +------+-----+-----+-------+---------------------------+-----------+
-   | 0x13 | 10  | 0   | 10011 | DetNet Local Path Option  | THIS RFC  |
-   +------+-----+-----+-------+---------------------------+-----------+
-   | 0x14 | 00  | 0   | 10100 | DetNet Global Path Option | THIS RFC  |
-   +------+-----+-----+-------+---------------------------+-----------+
+       +------+-----+-----+-------+--------------------+-----------+
+       | Hexa | act | chg | rest  | Description        | Reference |
+       +------+-----+-----+-------+--------------------+-----------+
+       | 0x12 | 00  | 0   | 10010 | DetNet Redundancy  | THIS RFC  |
+       |      |     |     |       | Information Option |           |
+       +------+-----+-----+-------+--------------------+-----------+
+       | 0x13 | 10  | 0   | 10011 | DetNet Local Path  | THIS RFC  |
+       |      |     |     |       | Option             |           |
+       +------+-----+-----+-------+--------------------+-----------+
+       | 0x14 | 00  | 0   | 10100 | DetNet Global Path | THIS RFC  |
+       |      |     |     |       | Option             |           |
+       +------+-----+-----+-------+--------------------+-----------+
 
-                    Table 3: DetNet Hop-by-Hop Options
+                     Table 3: DetNet Hop-by-Hop Options
 
 6.  Acknowledgments
 
@@ -603,11 +606,8 @@ Internet-Draft             DetNet HbH Options                  June 2021
               DOI 10.17487/RFC8877, September 2020,
               <https://www.rfc-editor.org/info/rfc8877>.
 
-   [HbH-UPDT] Hinden, R. M. and G. Fairhurst, "IPv6 Hop-by-Hop Options
-              Processing Procedures", Work in Progress, Internet-Draft,
-              draft-hinden-6man-hbh-processing-00, 3 December 2020,
-              <https://tools.ietf.org/html/draft-hinden-6man-hbh-
-              processing-00>.
+
+
 
 
 
@@ -617,6 +617,12 @@ Thubert                 Expires 12 December 2021               [Page 11]
 
 Internet-Draft             DetNet HbH Options                  June 2021
 
+
+   [HbH-UPDT] Hinden, R. M. and G. Fairhurst, "IPv6 Hop-by-Hop Options
+              Processing Procedures", Work in Progress, Internet-Draft,
+              draft-hinden-6man-hbh-processing-00, 3 December 2020,
+              <https://tools.ietf.org/html/draft-hinden-6man-hbh-
+              processing-00>.
 
    [DetNet-ARCH]
               Finn, N., Thubert, P., Varga, B., and J. Farkas,
@@ -656,12 +662,6 @@ Internet-Draft             DetNet HbH Options                  June 2021
               Specification", RFC 5905, DOI 10.17487/RFC5905, June 2010,
               <https://www.rfc-editor.org/info/rfc5905>.
 
-   [RPL]      Winter, T., Ed., Thubert, P., Ed., Brandt, A., Hui, J.,
-              Kelsey, R., Levis, P., Pister, K., Struik, R., Vasseur,
-              JP., and R. Alexander, "RPL: IPv6 Routing Protocol for
-              Low-Power and Lossy Networks", RFC 6550,
-              DOI 10.17487/RFC6550, March 2012,
-              <https://www.rfc-editor.org/info/rfc6550>.
 
 
 
@@ -673,6 +673,13 @@ Thubert                 Expires 12 December 2021               [Page 12]
 
 Internet-Draft             DetNet HbH Options                  June 2021
 
+
+   [RPL]      Winter, T., Ed., Thubert, P., Ed., Brandt, A., Hui, J.,
+              Kelsey, R., Levis, P., Pister, K., Struik, R., Vasseur,
+              JP., and R. Alexander, "RPL: IPv6 Routing Protocol for
+              Low-Power and Lossy Networks", RFC 6550,
+              DOI 10.17487/RFC6550, March 2012,
+              <https://www.rfc-editor.org/info/rfc6550>.
 
    [RFC6553]  Hui, J. and JP. Vasseur, "The Routing Protocol for Low-
               Power and Lossy Networks (RPL) Option for Carrying RPL
@@ -711,6 +718,18 @@ Internet-Draft             DetNet HbH Options                  June 2021
               IEEE 802.1, "Time-Sensitive Networking (TSN) Task Group",
               <http://www.ieee802.org/1/pages/tsn.html>.
 
+
+
+
+
+
+
+
+Thubert                 Expires 12 December 2021               [Page 13]
+
+Internet-Draft             DetNet HbH Options                  June 2021
+
+
    [IEEE Std. 1588]
               IEEE, "IEEE Standard for a Precision Clock Synchronization
               Protocol for Networked Measurement and Control Systems",
@@ -722,14 +741,6 @@ Internet-Draft             DetNet HbH Options                  June 2021
               <https://www.iana.org/assignments/ipv6-parameters/
               ipv6-parameters.xhtml>.
 
-
-
-
-Thubert                 Expires 12 December 2021               [Page 13]
-
-Internet-Draft             DetNet HbH Options                  June 2021
-
-
 Author's Address
 
    Pascal Thubert (editor)
@@ -738,17 +749,6 @@ Author's Address
 
    Phone: +33 497 23 26 34
    Email: pthubert@cisco.com
-
-
-
-
-
-
-
-
-
-
-
 
 
 

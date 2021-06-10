@@ -207,10 +207,13 @@ RPL HbH -> TrackID
    discriminated with an opaque 8-bit fragment tag.
    </t>
    <t>
-   A typical packet sequence can be expressed uniquely as a wrapping counter,
+   A packet sequence can be expressed uniquely as a wrapping counter,
    represented as an unsigned integer in the option. In that case, the size of
    the representation MUST be large enough to cover at least 3 times the upper
    bound on out-of-order packet delivery in terms of number of packets.
+   The sequence counter may be copied from a field in another protocol, and it
+   is possible that the value 0 is reserved when wrapping, to the option offers
+   both possibilities, wrapping to either 0 or to 1.
    </t>
    <t>
    This specification also allows to use a time stamp for the packet redundancy
@@ -249,7 +252,7 @@ RPL HbH -> TrackID
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|  Option Type  |  Opt Data Len |   Seq. Type   | Fragment Tag  |
+|  Option Type  |  Opt Data Len |  R.I. Type    | Fragment Tag  |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                                                               |
 .                                                               .
@@ -287,11 +290,11 @@ RPL HbH -> TrackID
     </dd>
 
 
-  <dt>Sequence Type:</dt>
+  <dt>Redundancy Information Type:</dt>
     <dd> <t>8-bit identifier of the type of Redundancy information.
     Value to be confirmed by IANA.</t>
 
-        <table anchor="seqo-seqt"><name>Sequence Type values (suggested)</name>
+        <table anchor="seqo-seqt"><name>Redundancy Information Type values (suggested)</name>
    <thead>
 
           <tr><th align='center'> Seq. Type Value</th>
@@ -568,7 +571,7 @@ RPL HbH -> TrackID
 
 
 
-   <table anchor='iana-st-tab'><name>Sequence Type values</name>
+   <table anchor='iana-st-tab'><name>Redundancy Information Type values</name>
    <thead>
       <tr><td>Suggested Value</td><td>Meaning</td><td>Reference</td></tr>
    </thead>
@@ -628,9 +631,9 @@ RPL HbH -> TrackID
    <tbody>
           <tr><td align='center'>0x12</td>
               <td>00</td><td>0</td><td>10010</td>
-              <td>DetNet Redundancy Option</td>
+              <td>DetNet Redundancy Information Option</td>
               <td>THIS RFC</td></tr>
-          <tr><td align='center'>0x13</td>
+          <tr><td align='center'>0x93</td>
               <td>10</td><td>0</td><td>10011</td>
               <td>DetNet Local Path Option</td>
               <td>THIS RFC</td></tr>
