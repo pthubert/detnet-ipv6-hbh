@@ -200,7 +200,7 @@ RPL HbH -> TrackID
 -->
    <t>
    The DetNet Redundancy Information Option helps discriminate copies of a same
-   packet vs. different packets, and is useful for Service-layer Packet
+   packet vs. different packets, and is useful for service-sublayer Packet
    Replication Elimination and Ordering Functions (PREOF). The typical
    expression redundancy information is a sequence counter, but it is not the
    only way to identify a packet. It is also possible that a packet is divided
@@ -375,38 +375,42 @@ RPL HbH -> TrackID
       <name>DetNet Path Options</name>
 
    <t>
-   DetNet can leverage any of the following HbH options to signal a path:
+   The DetNet Path Options carry path information that is independent from
+   the flows transported. When present, it is the information that MUST be
+   used to select the DetNet state at the DetNet forwarding sublayer.
    </t>
-   <ul>
-   <li>the RPL Option containing the RPL Packet Information (RPI) <xref target="RFC6553"/>.
-   </li>
-   <li>DetNet Strict Path Option  <xref target="dpatho"/>.
-   </li>
-   <li>DetNet Loose Path Option <xref target="gpatho"/>.
-   </li>
-   </ul>
-   <section anchor="rplo" numbered="true" toc="default">
-      <name>RPL Packet Information</name>
-
-    <!--  2222222222222222    -->
-
    <t>
-   6TiSCH <xref target="RFC9030"/>
-   and RAW <xref target='I-D.pthubert-raw-architecture'/>
-   signal a Track using a RPL Option <xref target="RFC6553"/>
-   with a RPLInstanceID used as TrackID.
-   This specification reuses the RPL option as a method to signal a DetNet path.
-   In that case, the Projected-Route 'P' flag
-   <xref target='I-D.ietf-roll-dao-projection'/> MUST be set to 1, and the O, R,
-   F flags, as well as the Sender Rank field, MUST be set to 0 by the originator,
-   forwarded as-is, and ignored on reception.
+   The path indicated therein is used by the service sublayer, as it is the
+   scope where the redundancy information is unique across a number of packets
+   large enough to ensure that a forwarding node never has to handle different
+   packets with the same redundancy information, though the same value may be
+   found for packets with a different path information.
    </t>
-
-    </section>
-    <!-- RPL Packet Information -->
-    <!--  2222222222222222    -->
-
-
+   <t>
+   The typical DetNet path is is contained under a single administrative
+   control or within a closed group of administrative control; these include
+   campus-wide networks and private WANs <xref target="RFC8655"/>.
+   The typical expectation is that all nodes along a DetNet path are aware of
+   the path and actively maintain a forwarding state for it. The DetNet Strict
+   Path Option (see <xref target="dpatho"/>) is designed for that environment;
+   if a packet escapes the local domain, a router that does not support the
+   option will intercept it and return an error to the source.
+   </t>
+   <t>
+   In other environments such as RAW, it might be that the service-layer
+   protection concentrates on just segments of the end-to-end path.
+   In that case, the service-sublayer protection may require the signaling of
+   both redundancy and path information, though the path information is
+   potentially not used by some intermediate routers. The path information may
+   also relate to segments are installed along the path using a DetNet
+   forwarding state as opposed to, say, SRv6. In either case the DetNet Loose
+   Path Option <xref target="gpatho"/> can be used to signal the path without
+   incurring an ICMP Error from an intermediate node.
+   </t>
+   <t>
+   DetNet can also leverage the RPL Option that signals a Track in the RPL
+   Packet Information (RPI) <xref target="RFC6553"/>. There are 2 versions of the RPL option, defined respectively in <xref target="RFC6550"/> with the act bits <xref target="RFC8200"/> set to dropped the packet when the option is  unknown, that defined in<xref target="RFC9008"/> which let the option be ignored.
+   </t>
 
 
    <section anchor="dpatho" numbered="true" toc="default">
@@ -420,10 +424,7 @@ RPL HbH -> TrackID
    </t>
    <t>
    The DetNet Strict Path Option is to be used in a limited domain and all
-   routers along the path are expected to support the option. The intention is
-   that if a packet escapes the local domain, a router that does not support the
-   option will intercept it and return an ICMP error.code 2 pointing at the
-   offset of the DetNet Strict Path Option.
+   routers along the path are expected to support the option.
    </t>
    <t>
    An intermediate router that supports the DetNet Strict Path Option but is
@@ -489,7 +490,7 @@ RPL HbH -> TrackID
    missing the necessary state to forward along the indicated path must ignore
    the DetNet Loose Path Option.
    </t>
-<figure anchor='gpatho-fmt'><name>DetNet GStrict Path Option Format</name>
+<figure anchor='gpatho-fmt'><name>DetNet Loose Path Option Format</name>
               <artwork align="center">
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -533,6 +534,31 @@ RPL HbH -> TrackID
     <!-- DetNet Loose Path Option -->
     <!--  222222222222222    -->
     </section>
+
+
+   <section anchor="rplo" numbered="true" toc="default">
+      <name>RPL Packet Information</name>
+
+    <!--  2222222222222222    -->
+
+   <t>
+   6TiSCH <xref target="RFC9030"/>
+   and RAW <xref target='I-D.pthubert-raw-architecture'/>
+   signal a Track using a RPL Option <xref target="RFC6553"/>
+   with a RPLInstanceID used as TrackID.
+   This specification reuses the RPL option as a method to signal a DetNet path.
+   In that case, the Projected-Route 'P' flag
+   <xref target='I-D.ietf-roll-dao-projection'/> MUST be set to 1, and the O, R,
+   F flags, as well as the Sender Rank field, MUST be set to 0 by the originator,
+   forwarded as-is, and ignored on reception.
+   </t>
+
+    </section>
+    <!-- RPL Packet Information -->
+    <!--  2222222222222222    -->
+
+
+
     <!-- DetNet Path Options -->
     <!--  1111111111111111    -->
 
@@ -686,6 +712,12 @@ RPL HbH -> TrackID
       <references>
     <name>Normative References</name>
 
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6550.xml"/>
+<!-- RPL -->
+
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6553.xml"/>
+<!-- RPL option-->
+
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8200.xml"/>
 <!-- IPv6 -->
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8126.xml"/>
@@ -698,6 +730,9 @@ RPL HbH -> TrackID
 
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8655.xml"/>
 <!-- Deterministic Networking Architecture -->
+
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9008.xml"/>
+<!-- use fo RPL info -->
 
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9030.xml"/>
 <!-- 6TiSCH Architecture -->
@@ -730,17 +765,9 @@ RPL HbH -> TrackID
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8279.xml"/>
     BIER -->
 
-<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6550.xml"/>
-<!-- RPL -->
-
-<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6553.xml"/>
-<!-- RPL option-->
 
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8557.xml"/>
 <!-- DetNet problem statement -->
-
-<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9008.xml"/>
-<!-- Use of RPL info -->
 
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3272.xml"/>
 <!-- TE -->
