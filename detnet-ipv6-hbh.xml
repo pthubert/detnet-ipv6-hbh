@@ -15,7 +15,7 @@
 <?rfc subcompact="no"?>
 <?rfc authorship="yes"?>
 <?rfc tocappendix="yes"?>
-<rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" docName="draft-pthubert-detnet-ipv6-hbh-03"
+<rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" docName="draft-pthubert-detnet-ipv6-hbh-04"
      ipr="trust200902" obsoletes="" updates="" submissionType="IETF" xml:lang="en" version="3">
   <front>
     <title abbrev="DetNet HbH Options">IPv6 Hop-by-Hop Options for DetNet</title>
@@ -380,14 +380,13 @@ RPL HbH -> TrackID
    used to select the DetNet state at the DetNet forwarding sublayer.
    </t>
    <t>
-   The path indicated therein is used by the service sublayer, as it is the
-   scope where the redundancy information is unique across a number of packets
-   large enough to ensure that a forwarding node never has to handle different
-   packets with the same redundancy information, though the same value may be
-   found for packets with a different path information.
+   The path indicated therein may also be used by the service sublayer, to signal the scope where the redundancy information is unique across a number
+   of packets large enough to ensure that a forwarding node never has to handle
+   different packets with the same redundancy information, though the same
+   value may be found for packets with a different path information.
    </t>
    <t>
-   The typical DetNet path is is contained under a single administrative
+   The typical DetNet path is typically contained under a single administrative
    control or within a closed group of administrative control; these include
    campus-wide networks and private WANs <xref target="RFC8655"/>.
    The typical expectation is that all nodes along a DetNet path are aware of
@@ -401,11 +400,11 @@ RPL HbH -> TrackID
    protection concentrates on just segments of the end-to-end path.
    In that case, the service-sublayer protection may require the signaling of
    both redundancy and path information, though the path information is
-   potentially not used by some intermediate routers. The path information may
-   also relate to segments are installed along the path using a DetNet
-   forwarding state as opposed to, say, SRv6. In either case the DetNet Loose
-   Path Option <xref target="gpatho"/> can be used to signal the path without
-   incurring an ICMP Error from an intermediate node.
+   potentially not used by some of the intermediate routers and may not be used
+   for forwarding at all. The path information may also relate to segments are installed along the path using a DetNet forwarding state as opposed to, say,
+   SRv6. In either case the DetNet Loose Path Option <xref target="gpatho"/>
+   can be used to signal the path without incurring an ICMP Error from an
+   intermediate node.
    </t>
    <t>
    DetNet can also leverage the RPL Option that signals a Track in the RPL

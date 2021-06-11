@@ -9,7 +9,7 @@ Expires: 13 December 2021
 
 
                    IPv6 Hop-by-Hop Options for DetNet
-                   draft-pthubert-detnet-ipv6-hbh-03
+                   draft-pthubert-detnet-ipv6-hbh-04
 
 Abstract
 
@@ -401,32 +401,33 @@ Internet-Draft             DetNet HbH Options                  June 2021
    MUST be used to select the DetNet state at the DetNet forwarding
    sublayer.
 
-   The path indicated therein is used by the service sublayer, as it is
-   the scope where the redundancy information is unique across a number
-   of packets large enough to ensure that a forwarding node never has to
-   handle different packets with the same redundancy information, though
-   the same value may be found for packets with a different path
-   information.
+   The path indicated therein may also be used by the service sublayer,
+   to signal the scope where the redundancy information is unique across
+   a number of packets large enough to ensure that a forwarding node
+   never has to handle different packets with the same redundancy
+   information, though the same value may be found for packets with a
+   different path information.
 
-   The typical DetNet path is is contained under a single administrative
-   control or within a closed group of administrative control; these
-   include campus-wide networks and private WANs [DetNet-ARCH].  The
-   typical expectation is that all nodes along a DetNet path are aware
-   of the path and actively maintain a forwarding state for it.  The
-   DetNet Strict Path Option (see Section 3.2.1) is designed for that
-   environment; if a packet escapes the local domain, a router that does
-   not support the option will intercept it and return an error to the
-   source.
+   The typical DetNet path is typically contained under a single
+   administrative control or within a closed group of administrative
+   control; these include campus-wide networks and private WANs
+   [DetNet-ARCH].  The typical expectation is that all nodes along a
+   DetNet path are aware of the path and actively maintain a forwarding
+   state for it.  The DetNet Strict Path Option (see Section 3.2.1) is
+   designed for that environment; if a packet escapes the local domain,
+   a router that does not support the option will intercept it and
+   return an error to the source.
 
    In other environments such as RAW, it might be that the service-layer
    protection concentrates on just segments of the end-to-end path.  In
    that case, the service-sublayer protection may require the signaling
    of both redundancy and path information, though the path information
-   is potentially not used by some intermediate routers.  The path
-   information may also relate to segments are installed along the path
-   using a DetNet forwarding state as opposed to, say, SRv6.  In either
-   case the DetNet Loose Path Option Section 3.2.2 can be used to signal
-   the path without incurring an ICMP Error from an intermediate node.
+   is potentially not used by some of the intermediate routers and may
+   not be used for forwarding at all.  The path information may also
+   relate to segments are installed along the path using a DetNet
+   forwarding state as opposed to, say, SRv6.  In either case the DetNet
+   Loose Path Option Section 3.2.2 can be used to signal the path
+   without incurring an ICMP Error from an intermediate node.
 
    DetNet can also leverage the RPL Option that signals a Track in the
    RPL Packet Information (RPI) [RFC6553].  There are 2 versions of the
@@ -440,8 +441,7 @@ Internet-Draft             DetNet HbH Options                  June 2021
    protocol-independent Strict Path Identifier, which is also taken from
    a namespace indicated by the IPv6 source address of the packet.
 
-   The DetNet Strict Path Option is to be used in a limited domain and
-   all routers along the path are expected to support the option.
+
 
 
 
@@ -449,6 +449,9 @@ Thubert                 Expires 13 December 2021                [Page 8]
 
 Internet-Draft             DetNet HbH Options                  June 2021
 
+
+   The DetNet Strict Path Option is to be used in a limited domain and
+   all routers along the path are expected to support the option.
 
    An intermediate router that supports the DetNet Strict Path Option
    but is missing the necessary state to forward along the indicated
@@ -493,9 +496,6 @@ Internet-Draft             DetNet HbH Options                  June 2021
    An intermediate router that supports the DetNet Loose Path Option but
    is missing the necessary state to forward along the indicated path
    must ignore the DetNet Loose Path Option.
-
-
-
 
 
 
