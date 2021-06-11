@@ -401,8 +401,10 @@ RPL HbH -> TrackID
    In that case, the service-sublayer protection may require the signaling of
    both redundancy and path information, though the path information is
    potentially not used by some of the intermediate routers and may not be used
-   for forwarding at all. The path information may also relate to segments are installed along the path using a DetNet forwarding state as opposed to, say,
-   SRv6. In either case the DetNet Loose Path Option <xref target="gpatho"/>
+   for forwarding at all. The path information may also relate to segments that
+   are installed along the path using a DetNet forwarding state as opposed to,
+   say, source routing.
+   In either case the DetNet Loose Path Option <xref target="gpatho"/>
    can be used to signal the path without incurring an ICMP Error from an
    intermediate node.
    </t>
