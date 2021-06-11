@@ -527,12 +527,12 @@ Internet-Draft             DetNet HbH Options                  June 2021
    Opt Data Len:  8-bit length of the option data, set to 6.
 
    Origin Autonomous System:  16-bit identifier of the Autonomous
-      Systems (AS) that originates the path.
+      Systems (AS) that originates the path.  The value of 0 signals a
+      DetNet path that is constrained within the local AS or the local
+      administrative DetNet domain.
 
    Loose Path ID:  32-bit identifier of the DetNet Path, taken from a
       local namespace associated with the origin AS of the DetNet path.
-      The value of 0 signals a DetNet path that is constrained within
-      the local AS or the local administrative DetNet domain.
 
 3.3.  RPL Packet Information
 

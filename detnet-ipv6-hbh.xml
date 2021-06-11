@@ -519,14 +519,13 @@ RPL HbH -> TrackID
 
   <dt>Origin Autonomous System:</dt>
     <dd> <t>16-bit identifier of the Autonomous Systems (AS) that originates the
-    path.
+    path. The value of 0 signals a DetNet path that is constrained within the
+    local AS or the local administrative DetNet domain.
     </t>
     </dd>
   <dt>Loose Path ID:</dt>
     <dd> <t>32-bit identifier of the DetNet Path, taken from a local
-   namespace associated with the origin AS of the DetNet path. The value
-   of 0 signals a DetNet path that is constrained within the local AS or the
-   local administrative DetNet domain.</t>
+   namespace associated with the origin AS of the DetNet path. </t>
     </dd>
   </dl>
     </section>
