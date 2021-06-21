@@ -9,7 +9,7 @@ Expires: 23 December 2021
 
 
                    IPv6 Hop-by-Hop Options for DetNet
-                   draft-pthubert-detnet-ipv6-hbh-04
+                   draft-pthubert-detnet-ipv6-hbh-05
 
 Abstract
 
