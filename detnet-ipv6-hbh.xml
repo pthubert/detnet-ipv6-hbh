@@ -67,23 +67,24 @@ RPL HbH -> TrackID
    to the IETF. DetNet extends the reach of lower layer technologies such as
    Time-Sensitive Networking (TSN) <xref target='IEEE8021TSN'/>
    and Timeslotted Channel Hopping (TSCH) <xref target='IEEE802154'/>
-   over IPv6 and MPLS <xref target="RFC8938"/>.
+   over IPv6 and MPLS <xref target="RFC8938"/>, to provide bounded latency and
+   reliability guarantees over an end-to-end layer-3 nailed-down path.
 </t>
 <t>
    The <xref target="RFC8655">"Deterministic Networking Architecture"</xref>
    details the contribution of layer-3 protocols, and defines three planes:
    the Application (User) Plane, the Controller Plane, and the Network Plane.
    <xref target="RFC8655"/> places an emphasis on the centralized model whereby
-   a controller instantiates per-flow state in the routers to perform adequate
-   forwading operations so as to provide end-to-end reliability and bounded
-   latency guarantees.
+   a controller instantiates a DetNet state in the routers that is located based
+   on matching information in the packet. For IPv6 flows, this document proposes
+   a layer-3 signaling to index that state, using an IPv6 Extension Header (EH).
 </t>
 <t>
    The <xref target="RFC9030">"6TiSCH Architecture"</xref> leverages RPL, the
    <xref target="RFC6550"> "Routing Protocol for Low Power and Lossy Networks"
    </xref> and introduces concept of a Track as a highly redundant RPL
    Destination Oriented Directed Acyclic Graph (DODAG) rooted at the Track
-   Ingress node, that can be installed using so-called projected routes
+   Ingress. A Track may for instance be installed using RPL route projection
    <xref target='I-D.ietf-roll-dao-projection'/>. In that case, the TrackId is
    an index from a namespace associated to one IPv6 address of the Track Ingress
    node, and the Track that an IPv6 packet follows is signaled by the combination
@@ -131,17 +132,23 @@ RPL HbH -> TrackID
   packets and/or multiple flows share the same fate and resource sharing over
   the same Track or the same Traffic Engineered (TE) <xref target="RFC3272"/>
   DetNet path.
-</t>
-<t>
-  This document introduces new IPv6 Hop-by-Hop options that signal DetNet path
-  and redundancy information to the intermediate relays in an abstract form that
-  is independent of the transport layer. Transported in IPv6 HbH Options, the
-  DetNet information is available early in the header chain of the packet and
-  can be added by a service instance as part of the encapsulation by the Ingress
-  of the DetNet path. It can then be accessed by the intermediate DetNet routers
-  without the need of a deep packet inspection (e.g., beyond UDP).
-</t>
+</t><t>
 
+  This document introduces new IPv6 Hop-by-Hop options that signal the needful
+  DetNet path and redundancy information to the intermediate relays in an
+  abstract form that is pure layer-3 and agnostic of the transport layer.
+
+</t><t>
+  This pure layer-3 technique alines DetNet with the IPv6 architecture and opens
+  to the progress / extensions done elsewhere for IPv6; e.g., if the DetNet path
+  leverages Segment routing (SRv6) <xref target="RFC8402"/> for some reason
+  - there are plausible ones in RAW -, the Source Route Header (SRH) will
+  be inserted after the HbH EH by the PE and both are readily accessible
+  for the on-path routers without the need of a deeper inspection of the packet
+  (up to and beyond the transport header).
+
+
+</t>
 
     </section>
     <!-- Introduction -->
@@ -165,6 +172,67 @@ RPL HbH -> TrackID
     </section>
     <!-- Terminology -->
 
+   <section anchor="applic" numbered="true" toc="default">
+      <name>Applicability</name>
+<t>
+  Transported in IPv6 HbH Options, the DetNet options are available early in
+  the header chain of the packet. A DetNet-aware end system (see section 4.2 of
+  <xref target="RFC8655"/>) may place the options in the header chain when
+  constructing the packet, in which case there is no need of an encapsulation.
+</t><t>
+  Alternatively, the source end system may signal the flow information some
+  other way, or it may lack the full DetNet awareness; in that case the DetNet
+  path endpoints are the provider Edge (PE) routers (see <xref target=
+  "fig5-8655"/> reproducing figure 5 of <xref target="RFC8655"/>) and the
+  Ingress PE needs to encapsulate the packets to add the HbH options.
+</t>
+
+<t>
+  In <xref target="fig5-8655"/>, the DetNet end systems may be f-aware and
+  signal an IPv6 flow using the 6-tuple for the End-to-End service, but may not
+  be s-aware, and may not sequence the packets for Packet Replication,
+  Elimination, and Ordering Functions (PREOF), which operate at the detNet
+  Service Layer. In that case, the Ingress PE will encapsulate the packets for
+  this and possibly other flows to provide a common DetNet Service with OAM and
+  PREOF, across the DetNet-1 service provider network, terminating the tunnel at
+  the Egress PE router.
+</t>
+<figure anchor='fig5-8655'><name>Figure 5 of RFC 8655, Reproduced</name>
+<artwork align="center"><![CDATA[                                                       _
+  / \     +----DetNet-UNI (U)                                   / \
+ /App\    |                                                    /App\
+/-----\   |                                                   /-----\
+| NIC |   v         ________                                  | NIC |
++--+--+   _____    /        \             DetNet-UNI (U) --+  +--+--+
+   |     /     \__/          \                             |     |
+   |    / +----+    +----+    \_____                       |     |
+   |   /  |    |    |    |          \_______               |     |
+   +------U PE +----+ P  +----+             \          _   v     |
+       |  |    |    |    |    |              |     ___/ \        |
+       |  +--+-+    +----+    |       +----+ |    /      \_      |
+       \     |                |       |    | |   /         \     |
+        \    |   +----+    +--+-+  +--+PE  |------         U-----+
+         \   |   |    |    |    |  |  |    | |   \_      _/
+          \  +---+ P  +----+ P  +--+  +----+ |     \____/
+           \___  |    |    |    |           /
+               \ +----+__  +----+     DetNet-1    DetNet-2
+   |            \_____/  \___________/                           |
+   |                                                             |
+   |      |     End-to-End Service         |     |         |     |
+   <------------------------------------------------------------->
+   |      |     DetNet Service             |     |         |     |
+   |      <------------------------------------------------>     |
+   |      |                                |     |         |     |
+]]></artwork>
+</figure>
+
+
+    <!--  1111111111111111    -->
+    </section>
+    <!-- Applicability -->
+
+
+
     <!--  00000000000000    -->
 
    <section anchor="ctxt" numbered="true" toc="default">
@@ -172,10 +240,36 @@ RPL HbH -> TrackID
     <!--  1111111111111111    -->
    <t>
    This document defines new IPv6 options for DetNet to signal path and a
-   sequence to the DetNet layers. Those options are to be placed in an IPv6
-   HbH Options Header. The format of the options follow the generic
-   definition in section 4.2 of <xref target="RFC8200"/>.
+   reliability information (e.g., sequencing) to the DetNet layers.
+   Those options are to be placed in the IPv6 HbH Options Header, which is found
+   right after the outer IPv6 header in the DetNet packet and immediately
+   reachable for the forwarding engine.
+   The format of the options follow the generic definition in section 4.2
+   of <xref target="RFC8200"/>.
+   For each tyoe of option, the draft allows to express the
+   information in different fashions, depending on the use case, and possibly
+   carrying an information that plays the same role at another layer, in which
+   case the format of the information is opaque.
    </t>
+
+
+   <t> The reliability
+   information may be inherited from another layer as long as the value is
+   guaranteed to be unique within a reasonable set of sequential packet so
+   all packets with the same value are redundant.
+   Timestamping can be used as an alternate sequencing technique, that avoids
+   maintaining per-path state at the path ingress, which is feasible for nodes
+   that maintain a very precise sense of time (e.g., from GPS or PTP) for their
+   DetNet operations.
+   As long as the time granularity is in the order of a few bytes transmission,
+   the system timestamp provides an absolute sense of ordering over a very long
+   period across all paths for which this node is ingress, and thus within any
+   of those.
+   Alternatively, the draft allows to combine a rough time stamp (e.g., from
+   a system clock synchronized by NTP) and a sequence counter that differntiates
+   the packets that are stamped within the timer resolution.
+   </t>
+
 
    <t>
    If a DetNet Path option (see <xref target="detnetpatho"/>), including the RPL
@@ -374,12 +468,43 @@ RPL HbH -> TrackID
    <section anchor="detnetpatho" numbered="true" toc="default">
       <name>DetNet Path Options</name>
 
+
    <t>
-   The DetNet Path Options carry path information that is independent from
-   the flows transported. When present, it is the information that MUST be
-   used to select the DetNet state at the DetNet forwarding sublayer.
+   The DetNet Architecture <xref target="RFC8655"/> assigns a DetNet flow
+   "to specific paths through a network", but is not specific on how the path is
+   then signaled in the packet. The DetNet Data Plane Framework <xref target="RFC8938"/> relies on the 6-tuple to identify an IPv6 flow and implicitely
+   the path could be indexed by the flow identification. But this requires to
+   maintain one path per flow and makes it difficult to assign other traffic
+   such as OAM to the same path.
+   </t>
+   <t>This draft provides aditional means to signal the path in which
+   the flow is placed separately from the flow indentification,
+   and independantly of the transport layer, so a path can be shared between
+   one or more flows and OAM packets across IP address families. All the packets
+   that are assigned to the same path are subject to the same DetNet forwarding
+   treatment.
+   </t>
+
+  <t>
+   the DetNet expectation is that a PCE sets up a state at the DetNet forwarding
+   sublayer to instruct each hop on how to process the DetNet flows.
+   The DetNet Path Options when present contains information that MUST be used
+   to select the DetNet state installed and if the DetNet state does not exist
+   then the packet cannot be forwarded.
+   </t>
+
+   <section anchor="dpatho" numbered="true" toc="default">
+      <name>DetNet Strict Path Option</name>
+
+
+   <t>
+   In complement to the RPL option, this specification defines a
+   protocol-independent Strict Path Identifier, which is also taken from
+   a namespace indicated by the IPv6 source address of the packet.
    </t>
    <t>
+   The DetNet Strict Path Option is to be used in a limited domain and all
+   routers along the path are expected to support the option.
    The path indicated therein may also be used by the service sublayer, to signal the scope where the redundancy information is unique across a number
    of packets large enough to ensure that a forwarding node never has to handle
    different packets with the same redundancy information, though the same
@@ -409,30 +534,15 @@ RPL HbH -> TrackID
    intermediate node.
    </t>
    <t>
-   DetNet can also leverage the RPL Option that signals a Track in the RPL
-   Packet Information (RPI) <xref target="RFC6553"/>. There are 2 versions of the RPL option, defined respectively in <xref target="RFC6550"/> with the act bits <xref target="RFC8200"/> set to dropped the packet when the option is  unknown, that defined in<xref target="RFC9008"/> which let the option be ignored.
-   </t>
-
-
-   <section anchor="dpatho" numbered="true" toc="default">
-      <name>DetNet Strict Path Option</name>
-
-
-   <t>
-   In complement to the RPL option, this specification defines a
-   protocol-independent Strict Path Identifier, which is also taken from
-   a namespace indicated by the IPv6 source address of the packet.
-   </t>
-   <t>
-   The DetNet Strict Path Option is to be used in a limited domain and all
-   routers along the path are expected to support the option.
-   </t>
-   <t>
    An intermediate router that supports the DetNet Strict Path Option but is
    missing the necessary state to forward along the indicated path must drop the
    packet and return an ICMP error.code 0 pointing at the offset of the
    Strict Path ID in the DetNet Strict Path Option.
     </t>
+   <t>
+   DetNet can also leverage the RPL Option that signals a Track in the RPL
+   Packet Information (RPI) <xref target="RFC6553"/>. There are 2 versions of the RPL option, defined respectively in <xref target="RFC6550"/> with the act bits <xref target="RFC8200"/> set to dropped the packet when the option is  unknown, that defined in<xref target="RFC9008"/> which let the option be ignored.
+   </t>
 <figure anchor='patho-fmt'><name>DetNet Strict Path Option Format</name>
               <artwork align="center">
  0                   1                   2                   3
@@ -757,9 +867,9 @@ RPL HbH -> TrackID
 
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5905.xml"/>
 <!-- NTPv4 -->
-<!--
+
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8402.xml"/>
-    Segment Routing Architecture -->
+<!--    Segment Routing Architecture -->
 
 <!--
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8279.xml"/>
