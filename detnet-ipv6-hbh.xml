@@ -15,7 +15,7 @@
 <?rfc subcompact="no"?>
 <?rfc authorship="yes"?>
 <?rfc tocappendix="yes"?>
-<rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" docName="draft-pthubert-detnet-ipv6-hbh-0"
+<rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" docName="draft-pthubert-detnet-ipv6-hbh-06"
      ipr="trust200902" obsoletes="" updates="" submissionType="IETF" xml:lang="en" version="3">
   <front>
     <title abbrev="DetNet Options">IPv6 Options for DetNet</title>
@@ -158,11 +158,12 @@ RPL HbH -> TrackID
   deeper inspection of the packet (up to and beyond the transport header).
 </t><t>
   For instance, the DetNet Redundancy Information Option may be placed in a DOH
-  EH before an SRH that signals the exhaustive list of the Detnet relays along
-  the path of the packet, so every relay can process the redundancy information
+  before an SRH that signals the exhaustive list of the DetNet relays along the
+  path of the packet, so every relay can process the redundancy information
   therein, while the DetNet Strict Path Option would be placed in an HbH EH to
-  be read by every DeNet fowarding node, and intercepted should it strays away
+  be read by every DetNet forwarding node, and intercepted should it strays away
   from its path.
+
 </t>
 
     </section>
