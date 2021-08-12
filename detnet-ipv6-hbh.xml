@@ -18,7 +18,7 @@
 <rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" docName="draft-pthubert-detnet-ipv6-hbh-0"
      ipr="trust200902" obsoletes="" updates="" submissionType="IETF" xml:lang="en" version="3">
   <front>
-    <title abbrev="DetNet HbH Options">IPv6 Hop-by-Hop Options for DetNet</title>
+    <title abbrev="DetNet Options">IPv6 Options for DetNet</title>
     <author initials="P" surname="Thubert" fullname="Pascal Thubert" role="editor">
       <organization abbrev="Cisco Systems">Cisco Systems, Inc</organization>
       <address>
@@ -50,8 +50,8 @@ RPL HbH -> TrackID
       that flow, and to transport different types of packets along the same path
       with the same treatment, e.g., Operations, Administration, and Maintenance
       packets and/or multiple flows with fate and resource sharing. This
-      document introduces new IPv6 Hop-by-Hop options that signal that path and
-      redundancy information to the intermediate DetNet relays.
+      document introduces new IPv6 options that signal that path and redundancy
+      information to the intermediate DetNet relay and forwarding nodes.
 
       </t>
     </abstract>
@@ -84,7 +84,11 @@ RPL HbH -> TrackID
    <xref target="RFC6550"> "Routing Protocol for Low Power and Lossy Networks"
    </xref> and introduces concept of a Track as a highly redundant RPL
    Destination Oriented Directed Acyclic Graph (DODAG) rooted at the Track
-   Ingress. A Track may for instance be installed using RPL route projection
+   Ingress.
+</t>
+<t>
+
+   A Track may for instance be installed using RPL route projection
    <xref target='I-D.ietf-roll-dao-projection'/>. In that case, the TrackId is
    an index from a namespace associated to one IPv6 address of the Track Ingress
    node, and the Track that an IPv6 packet follows is signaled by the combination
@@ -133,21 +137,32 @@ RPL HbH -> TrackID
   the same Track or the same Traffic Engineered (TE) <xref target="RFC3272"/>
   DetNet path.
 </t><t>
-
-  This document introduces new IPv6 Hop-by-Hop options that signal the needful
-  DetNet path and redundancy information to the intermediate relays in an
-  abstract form that is pure layer-3 and agnostic of the transport layer.
-
+  As opposed to the HbH EH, the Destination Option Header (DOH) is only read
+  by the destination of the packet, which can be one at a time the collection of
+  nodes listed in a Routing Extension Header (RH) if the DOH is placed before
+  the RH.
+</t><t>
+  This document introduces new IPv6 Options, the DetNet Redundancy Information
+  Option and the DetNet Path Options, that signal the DetNet information to the
+  intermediate DetNet nodes in an abstract form, that is pure layer-3 and
+  agnostic of the transport layer. The options are placed in either a HbH EH or
+  in a DOH, which happens when the next node that needs to process the option is
+  the IPv6 destination in the IPv6 header.
 </t><t>
   This pure layer-3 technique alines DetNet with the IPv6 architecture and opens
   to the progress / extensions done elsewhere for IPv6; e.g., if the DetNet path
   leverages Segment routing (SRv6) <xref target="RFC8402"/> for some reason
-  - there are plausible ones in RAW -, the Source Route Header (SRH) will
-  be inserted after the HbH EH by the PE and both are readily accessible
-  for the on-path routers without the need of a deeper inspection of the packet
-  (up to and beyond the transport header).
-
-
+  - there are plausible ones in RAW -, the Segment Routing Header (SRH)
+  <xref target="RFC8754"/> is inserted after the HbH and/or DOH by the PE
+  and both are readily accessible for the on-path routers without the need of a
+  deeper inspection of the packet (up to and beyond the transport header).
+</t><t>
+  For instance, the DetNet Redundancy Information Option may be placed in a DOH
+  EH before an SRH that signals the exhaustive list of the Detnet relays along
+  the path of the packet, so every relay can process the redundancy information
+  therein, while the DetNet Strict Path Option would be placed in an HbH EH to
+  be read by every DeNet fowarding node, and intercepted should it strays away
+  from its path.
 </t>
 
     </section>
@@ -295,11 +310,18 @@ RPL HbH -> TrackID
    <t>
    The DetNet Redundancy Information Option helps discriminate copies of a same
    packet vs. different packets, and is useful for service-sublayer Packet
-   Replication Elimination and Ordering Functions (PREOF). The typical
-   expression redundancy information is a sequence counter, but it is not the
-   only way to identify a packet. It is also possible that a packet is divided
-   in elements such as network-coded fragments. In that case, the pieces are
-   discriminated with an opaque 8-bit fragment tag.
+   Replication Elimination and Ordering Functions (PREOF). The option may be
+   placed either in an HbH or a DoH EH, e.g., prior to a Segment Routing Header
+   (SRH) <xref target='RFC8754'/> that lists the DetNet relays. A sequence
+   counter is probably the most typical expression of the redundancy information,
+   but it is not the only way to identify a packet and/or enable reordering, e.g.,
+   a timestamp can be seen as a large sequence counter with gaps.
+   </t>
+   <t>
+   It is also possible that a packet is divided in elements such as
+   network-coded fragments. In that case, the pieces are discriminated with an
+   opaque 8-bit fragment tag. The goal is to retain one copy of each fragment
+   but not reorder them.
    </t>
    <t>
    A packet sequence can be expressed uniquely as a wrapping counter,
@@ -505,6 +527,7 @@ RPL HbH -> TrackID
    <t>
    The DetNet Strict Path Option is to be used in a limited domain and all
    routers along the path are expected to support the option.
+   The option is placed in an HbH EH to be seen by all routers on path.
    The path indicated therein may also be used by the service sublayer, to signal the scope where the redundancy information is unique across a number
    of packets large enough to ensure that a forwarding node never has to handle
    different packets with the same redundancy information, though the same
@@ -588,7 +611,9 @@ RPL HbH -> TrackID
    The DetNet Loose Path Option transports a Loose Path identifier which is
    taken from a namespace indicated by the Origin Autonomous System (AS). When
    the DetNet path is contained within a single AS, the Origin Autonomous System
-   field can be left to 0 indicating local AS.
+   field can be left to 0 indicating local AS. The option may be
+   placed either in an HbH or a DoH EH, but the preferred method is a DOH that
+   precedes an RH such as SRH.
     </t>
    <t>
    The DetNet Loose Path Option is to be used to signal a path that may be
@@ -861,6 +886,9 @@ RPL HbH -> TrackID
 <xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-roll-dao-projection.xml'/>
 
 
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3272.xml"/>
+<!-- TE -->
+
 
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6291.xml"/>
 <!-- Guidelines for the Use of the "OAM" Acronym in the IETF  -->
@@ -875,12 +903,11 @@ RPL HbH -> TrackID
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8279.xml"/>
     BIER -->
 
-
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8557.xml"/>
 <!-- DetNet problem statement -->
 
-<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3272.xml"/>
-<!-- TE -->
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8754.xml"/>
+<!-- SRv6 SRH -->
 
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8938.xml"/>
 <!--   Deterministic Networking (DetNet) Data Plane Framework -->
