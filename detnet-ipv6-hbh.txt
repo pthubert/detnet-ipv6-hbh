@@ -10,7 +10,7 @@ Expires: 25 February 2022                            Huawei Technologies
 
 
                         IPv6 Options for DetNet
-                   draft-pthubert-detnet-ipv6-hbh-06
+                   draft-pthubert-detnet-ipv6-hbh-07
 
 Abstract
 
@@ -594,7 +594,7 @@ Internet-Draft               DetNet Options                  August 2021
    The DetNet Strict Path Option is to be used in a limited domain to
    indicate a routing state that must be present in all nodes to ensure
    that the packet is routed along a strictly predefined path, for
-   instance pointing at a specific netxt hop with reserved resources for
+   instance pointing at a specific next hop with reserved resources for
    buffers and bandwidth.  For that reason all the routers along the
    path are expected to support the option and own a state indexed by
    the Strict Path ID indicated therein.
