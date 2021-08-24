@@ -4,8 +4,9 @@
 
 DetNet                                                   P. Thubert, Ed.
 Internet-Draft                                             Cisco Systems
-Intended status: Standards Track                          12 August 2021
-Expires: 13 February 2022
+Intended status: Standards Track                                 F. Yang
+Expires: 25 February 2022                            Huawei Technologies
+                                                          24 August 2021
 
 
                         IPv6 Options for DetNet
@@ -38,7 +39,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 13 February 2022.
+   This Internet-Draft will expire on 25 February 2022.
 
 Copyright Notice
 
@@ -49,15 +50,15 @@ Copyright Notice
    Provisions Relating to IETF Documents (https://trustee.ietf.org/
    license-info) in effect on the date of publication of this document.
    Please review these documents carefully, as they describe your rights
-   and restrictions with respect to this document.  Code Components
 
 
 
-Thubert                 Expires 13 February 2022                [Page 1]
+Thubert & Yang          Expires 25 February 2022                [Page 1]
 
 Internet-Draft               DetNet Options                  August 2021
 
 
+   and restrictions with respect to this document.  Code Components
    extracted from this document must include Simplified BSD License text
    as described in Section 4.e of the Trust Legal Provisions and are
    provided without warranty as described in the Simplified BSD License.
@@ -65,23 +66,26 @@ Internet-Draft               DetNet Options                  August 2021
 Table of Contents
 
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
-   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   4
-   3.  Applicability . . . . . . . . . . . . . . . . . . . . . . . .   4
+   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   5
+   3.  Applicability . . . . . . . . . . . . . . . . . . . . . . . .   5
    4.  The DetNet Options  . . . . . . . . . . . . . . . . . . . . .   6
-     4.1.  DetNet Redundancy Information Option  . . . . . . . . . .   6
-     4.2.  DetNet Path Options . . . . . . . . . . . . . . . . . . .  10
-       4.2.1.  DetNet Strict Path Option . . . . . . . . . . . . . .  10
-       4.2.2.  DetNet Loose Path Option  . . . . . . . . . . . . . .  12
-     4.3.  RPL Packet Information  . . . . . . . . . . . . . . . . .  13
-   5.  Security Considerations . . . . . . . . . . . . . . . . . . .  13
-   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  13
-     6.1.  New Subregistry for the Redundancy Type . . . . . . . . .  13
-     6.2.  New Hop-by-Hop Options  . . . . . . . . . . . . . . . . .  14
-   7.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  14
-   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  14
-     8.1.  Normative References  . . . . . . . . . . . . . . . . . .  14
-     8.2.  Informative References  . . . . . . . . . . . . . . . . .  15
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  17
+     4.1.  DetNet Redundancy Information Option  . . . . . . . . . .   7
+     4.2.  DetNet Path Options . . . . . . . . . . . . . . . . . . .  11
+       4.2.1.  DetNet Strict Path Option . . . . . . . . . . . . . .  11
+       4.2.2.  DetNet Loose Path Option  . . . . . . . . . . . . . .  13
+     4.3.  RPL Packet Information  . . . . . . . . . . . . . . . . .  14
+   5.  Encapsulation of DetNet Options . . . . . . . . . . . . . . .  14
+     5.1.  IPv6 Network  . . . . . . . . . . . . . . . . . . . . . .  14
+     5.2.  Segment Routing over IPv6 Network . . . . . . . . . . . .  16
+   6.  Security Considerations . . . . . . . . . . . . . . . . . . .  17
+   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  17
+     7.1.  New Subregistry for the Redundancy Type . . . . . . . . .  18
+     7.2.  New Hop-by-Hop Options  . . . . . . . . . . . . . . . . .  18
+   8.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . .  19
+   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  19
+     9.1.  Normative References  . . . . . . . . . . . . . . . . . .  19
+     9.2.  Informative References  . . . . . . . . . . . . . . . . .  20
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  22
 
 1.  Introduction
 
@@ -98,21 +102,38 @@ Table of Contents
    Application (User) Plane, the Controller Plane, and the Network
    Plane.  [DetNet-ARCH] places an emphasis on the centralized model
    whereby a controller instantiates a DetNet state in the routers that
-   is located based on matching information in the packet.  For IPv6
-   flows, this document proposes a layer-3 signaling to index that
-   state, using an IPv6 Extension Header (EH).
+   is located based on matching information in the packet.
+
+
+
+
+
+
+Thubert & Yang          Expires 25 February 2022                [Page 2]
+
+Internet-Draft               DetNet Options                  August 2021
+
+
+   The "Deterministic Networking Data Plane Framework" [RFC8938] relies
+   on the 6-tuple to identify an IPv6 flow.  But the full DetNet
+   operations require also the capabilities to signal meta-information
+   such as a sequence within that flow, and to transport different types
+   of packets along the same path with the same treatment.  For
+   instance, it is required that Operations, Administration, and
+   Maintenance (OAM) [RFC6291] packets and/or multiple flows share the
+   same fate and resource sharing over the same Track or the same
+   Traffic Engineered (TE) [RFC3272] DetNet path.  This document
+   proposes a layer-3 signaling that is independent of the upper layer
+   information, to locate the DetNet state and enable the same
+   forwarding nehavior for the data flows and the OAM packets.
 
    The "6TiSCH Architecture" [6TiSCH-ARCH] leverages RPL, the "Routing
    Protocol for Low Power and Lossy Networks" [RPL] and introduces
    concept of a Track as a highly redundant RPL Destination Oriented
-   Directed Acyclic Graph (DODAG) rooted at the Track Ingress.
-
-
-
-Thubert                 Expires 13 February 2022                [Page 2]
-
-Internet-Draft               DetNet Options                  August 2021
-
+   Directed Acyclic Graph (DODAG) rooted at the Track Ingress.  The
+   Track is indicative of a layer-3 forwarding behavior (e.g., next
+   hops)as opposed to indicative of the upper layer content, so it is
+   more in line with the DetNet needs than the 6-tuple.
 
    A Track may for instance be installed using RPL route projection
    [RPL-PDAO].  In that case, the TrackId is an index from a namespace
@@ -132,6 +153,23 @@ Internet-Draft               DetNet Options                  August 2021
    service within a Track in the face of the rapid evolution of the
    medium properties.
 
+
+
+
+
+
+
+
+
+
+
+
+
+Thubert & Yang          Expires 25 February 2022                [Page 3]
+
+Internet-Draft               DetNet Options                  August 2021
+
+
    With [IPv6], the behavior of a router upon an IPv6 packet with a HbH
    Options Header has evolved, making the examination of the header by
    routers along the path optional, as opposed to previously mandatory.
@@ -150,25 +188,6 @@ Internet-Draft               DetNet Options                  August 2021
    their use in the Internet.  In that context, it makes sense to
    consider Hop-by-Hop Options to transport the information that is
    relevant to DetNet.
-
-   The "Deterministic Networking Data Plane Framework" [RFC8938] relies
-   on the 6-tuple to identify an IPv6 flow.  But the full DetNet
-   operations require also the capabilities to signal meta-information
-   such as a sequence within that flow, and to transport different types
-   of packets along the same path with the same treatment.  For
-   instance, it is required that Operations, Administration, and
-   Maintenance (OAM) [RFC6291] packets and/or multiple flows share the
-   same fate and resource sharing over the same Track or the same
-   Traffic Engineered (TE) [RFC3272] DetNet path.
-
-
-
-
-
-Thubert                 Expires 13 February 2022                [Page 3]
-
-Internet-Draft               DetNet Options                  August 2021
-
 
    As opposed to the HbH EH, the Destination Option Header (DOH) is only
    read by the destination of the packet, which can be one at a time the
@@ -199,6 +218,14 @@ Internet-Draft               DetNet Options                  August 2021
    would be placed in an HbH EH to be read by every DetNet forwarding
    node, and intercepted should it strays away from its path.
 
+
+
+
+Thubert & Yang          Expires 25 February 2022                [Page 4]
+
+Internet-Draft               DetNet Options                  August 2021
+
+
 2.  Terminology
 
    Timestamp semantics and timestamp formats used in this document are
@@ -218,14 +245,6 @@ Internet-Draft               DetNet Options                  August 2021
    header chain when constructing the packet, in which case there is no
    need of an encapsulation.
 
-
-
-
-Thubert                 Expires 13 February 2022                [Page 4]
-
-Internet-Draft               DetNet Options                  August 2021
-
-
    Alternatively, the source end system may signal the flow information
    some other way, or it may lack the full DetNet awareness; in that
    case the DetNet path endpoints are the provider Edge (PE) routers
@@ -240,6 +259,28 @@ Internet-Draft               DetNet Options                  August 2021
    the packets for this and possibly other flows to provide a common
    DetNet Service with OAM and PREOF, across the DetNet-1 service
    provider network, terminating the tunnel at the Egress PE router.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Thubert & Yang          Expires 25 February 2022                [Page 5]
+
+Internet-Draft               DetNet Options                  August 2021
+
 
                                                           _
      / \     +----DetNet-UNI (U)                                   / \
@@ -269,19 +310,6 @@ Internet-Draft               DetNet Options                  August 2021
 
                  Figure 1: Figure 5 of RFC 8655, Reproduced
 
-
-
-
-
-
-
-
-
-Thubert                 Expires 13 February 2022                [Page 5]
-
-Internet-Draft               DetNet Options                  August 2021
-
-
 4.  The DetNet Options
 
    This document defines new IPv6 options for DetNet to signal path and
@@ -302,6 +330,14 @@ Internet-Draft               DetNet Options                  August 2021
    technique, that avoids maintaining per-path state at the path
    ingress, which is feasible for nodes that maintain a very precise
    sense of time (e.g., from GPS or PTP) for their DetNet operations.
+
+
+
+Thubert & Yang          Expires 25 February 2022                [Page 6]
+
+Internet-Draft               DetNet Options                  August 2021
+
+
    As long as the time granularity is in the order of a few bytes
    transmission, the system timestamp provides an absolute sense of
    ordering over a very long period across all paths for which this node
@@ -329,15 +365,6 @@ Internet-Draft               DetNet Options                  August 2021
    to identify a packet and/or enable reordering, e.g., a timestamp can
    be seen as a large sequence counter with gaps.
 
-
-
-
-
-Thubert                 Expires 13 February 2022                [Page 6]
-
-Internet-Draft               DetNet Options                  August 2021
-
-
    It is also possible that a packet is divided in elements such as
    network-coded fragments.  In that case, the pieces are discriminated
    with an opaque 8-bit fragment tag.  The goal is to retain one copy of
@@ -359,6 +386,14 @@ Internet-Draft               DetNet Options                  August 2021
    Network Time Protocol (NTP) [RFC5905] formats.  In that case, the
    timestamp resolution at the origin node that builds the option MUST
    be fine enough to ensure that two consecutive packets are never
+
+
+
+Thubert & Yang          Expires 25 February 2022                [Page 7]
+
+Internet-Draft               DetNet Options                  August 2021
+
+
    stamped with the same value.  There is no requirement for this
    particular stamping function that the sense of time at the origin
    node is synchronized with the rest of the DetNet network.
@@ -383,17 +418,6 @@ Internet-Draft               DetNet Options                  August 2021
    3 times the number of packets that may be sent with the same value of
    time stamp.
 
-
-
-
-
-
-
-Thubert                 Expires 13 February 2022                [Page 7]
-
-Internet-Draft               DetNet Options                  August 2021
-
-
       0                   1                   2                   3
       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -417,6 +441,14 @@ Internet-Draft               DetNet Options                  August 2021
       route to the packet's final destination (chg=0).  The
 
    Opt Data Len:  8-bit length of the option data.
+
+
+
+
+Thubert & Yang          Expires 25 February 2022                [Page 8]
+
+Internet-Draft               DetNet Options                  August 2021
+
 
    Fragment Tag:  8-bit field, set to 0 when the packet is sent in
       entirety; packets with the same Redundancy Information and
@@ -445,7 +477,31 @@ Internet-Draft               DetNet Options                  August 2021
 
 
 
-Thubert                 Expires 13 February 2022                [Page 8]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Thubert & Yang          Expires 25 February 2022                [Page 9]
 
 Internet-Draft               DetNet Options                  August 2021
 
@@ -501,7 +557,7 @@ Internet-Draft               DetNet Options                  August 2021
 
 
 
-Thubert                 Expires 13 February 2022                [Page 9]
+Thubert & Yang          Expires 25 February 2022               [Page 10]
 
 Internet-Draft               DetNet Options                  August 2021
 
@@ -535,32 +591,39 @@ Internet-Draft               DetNet Options                  August 2021
    protocol-independent Strict Path Identifier, which is also taken from
    a namespace indicated by the IPv6 source address of the packet.
 
-   The DetNet Strict Path Option is to be used in a limited domain and
-   all routers along the path are expected to support the option.  The
-   option is placed in an HbH EH to be seen by all routers on path.  The
-   path indicated therein may also be used by the service sublayer, to
-   signal the scope where the redundancy information is unique across a
-   number of packets large enough to ensure that a forwarding node never
-   has to handle different packets with the same redundancy information,
-   though the same value may be found for packets with a different path
-   information.
+   The DetNet Strict Path Option is to be used in a limited domain to
+   indicate a routing state that must be present in all nodes to ensure
+   that the packet is routed along a strictly predefined path, for
+   instance pointing at a specific netxt hop with reserved resources for
+   buffers and bandwidth.  For that reason all the routers along the
+   path are expected to support the option and own a state indexed by
+   the Strict Path ID indicated therein.
+
+   The option is placed in an HbH EH to be seen by all routers on path.
+   The path indicated therein may also be used by the service sublayer,
+   to signal the scope where the redundancy information is unique across
+   a number of packets large enough to ensure that a forwarding node
+   never has to handle different packets with the same redundancy
+   information, though the same value may be found for packets with a
+   different path information.
 
    The typical DetNet path is typically contained under a single
    administrative control or within a closed group of administrative
    control; these include campus-wide networks and private WANs
+
+
+
+Thubert & Yang          Expires 25 February 2022               [Page 11]
+
+Internet-Draft               DetNet Options                  August 2021
+
+
    [DetNet-ARCH].  The typical expectation is that all nodes along a
    DetNet path are aware of the path and actively maintain a forwarding
    state for it.  The DetNet Strict Path Option (see Section 4.2.1) is
    designed for that environment; if a packet escapes the local domain,
    a router that does not support the option will intercept it and
    return an error to the source.
-
-
-
-Thubert                 Expires 13 February 2022               [Page 10]
-
-Internet-Draft               DetNet Options                  August 2021
-
 
    In other environments such as RAW, it might be that the service-layer
    protection concentrates on just segments of the end-to-end path.  In
@@ -584,11 +647,11 @@ Internet-Draft               DetNet Options                  August 2021
    set to dropped the packet when the option is unknown, that defined
    in[RFC9008] which let the option be ignored.
 
-     0                   1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |  Option Type  |  Opt Data Len |    Strict Path ID              |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      0                   1                   2                   3
+      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+     |  Option Type  |  Opt Data Len |                 |
+     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
                  Figure 3: DetNet Strict Path Option Format
 
@@ -603,20 +666,17 @@ Internet-Draft               DetNet Options                  August 2021
 
    Opt Data Len:  8-bit length of the option data, set to 2.
 
-   Strict Path ID:  16-bit identifier of the DetNet Path, taken from a
-      local namespace associated with the IPv6 source address of the
-      packet.
 
 
 
-
-
-
-
-Thubert                 Expires 13 February 2022               [Page 11]
+Thubert & Yang          Expires 25 February 2022               [Page 12]
 
 Internet-Draft               DetNet Options                  August 2021
 
+
+   Strict Path ID:  16-bit identifier of the DetNet Path, taken from a
+      local namespace associated with the IPv6 source address of the
+      packet.
 
 4.2.2.  DetNet Loose Path Option
 
@@ -630,11 +690,16 @@ Internet-Draft               DetNet Options                  August 2021
    The DetNet Loose Path Option is to be used to signal a path that may
    be loose and may exceed the boundaries of a local domain; a portion
    of the hops may traverse routers in the wider internet that will not
-   leverage the option and are expected to ignore it.
+   leverage the option and are expected to ignore it.  For instance, the
+   path information may signal a specific topology in a multi-topology
+   network and is only important for nodes that participate to more than
+   one topology.
 
    An intermediate router that supports the DetNet Loose Path Option but
    is missing the necessary state to forward along the indicated path
-   must ignore the DetNet Loose Path Option.
+   must ignore the DetNet Loose Path Option, but it should raise a
+   management alert as this is an unexpected situation with a limited
+   chance that the packet may loop till TTL.
 
       0                   1                   2                   3
       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -657,22 +722,20 @@ Internet-Draft               DetNet Options                  August 2021
    Opt Data Len:  8-bit length of the option data, set to 6.
 
    Origin Autonomous System:  16-bit identifier of the Autonomous
+
+
+
+Thubert & Yang          Expires 25 February 2022               [Page 13]
+
+Internet-Draft               DetNet Options                  August 2021
+
+
       Systems (AS) that originates the path.  The value of 0 signals a
       DetNet path that is constrained within the local AS or the local
       administrative DetNet domain.
 
    Loose Path ID:  32-bit identifier of the DetNet Path, taken from a
       local namespace associated with the origin AS of the DetNet path.
-
-
-
-
-
-
-Thubert                 Expires 13 February 2022               [Page 12]
-
-Internet-Draft               DetNet Options                  August 2021
-
 
 4.3.  RPL Packet Information
 
@@ -684,11 +747,214 @@ Internet-Draft               DetNet Options                  August 2021
    MUST be set to 0 by the originator, forwarded as-is, and ignored on
    reception.
 
-5.  Security Considerations
+5.  Encapsulation of DetNet Options
 
-6.  IANA Considerations
+   In this section, encapsulations of three DetNet Options are specified
+   separately in the scenarios of pure IPv6 and SRv6.
 
-6.1.  New Subregistry for the Redundancy Type
+5.1.  IPv6 Network
+
+   The DetNet Strict Path Option are intended to be placed in an IPv6
+   HbH option header since they are used on every DetNet forwarding and
+   relay nodes along the path.  The DetNet Loose Path Option and the
+   DetNet Redundancy Information Option may also carried in an IPv6 HbH
+   Option header the case where the set of routers that need the
+   information does not match the destinations along a source route
+   path; those options are intended to be ignored by unaware
+   intermediate routers.
+
+   In the specific case where path selection and PREOF are end-to-end
+   performed between DetNet edge nodes, Redundancy Information Option
+   can be alternatively placed in IPv6 Destination Option header.  The
+   encapsulation options are shown in Figure 5 and Figure 6.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Thubert & Yang          Expires 25 February 2022               [Page 14]
+
+Internet-Draft               DetNet Options                  August 2021
+
+
+            +-----------------------------------+
+            |         DetNet App-Flow           |
+            |       (original IP) Packet        |
+            +-----------------------------------+
+            |            other EHs              |
+            +-----------------------------------+ <--\
+            |        IPv6 Hop-by-Hop Ex Hdr     |    |
+            |          (DetNet RI Option)       | DetNet Options
+            | (DetNet Strict/Loose Path Option) |    |
+            +-----------------------------------+ <--/
+            |            IPv6 Header            |
+            +-----------------------------------+
+            |             Data-Link             |
+            +-----------------------------------+
+            |             Physical              |
+            +-----------------------------------+
+
+
+          Figure 5: DetNet IPv6 Option Encapsulation Alternative 1
+
+
+            +-----------------------------------+
+            |         DetNet App-Flow           |
+            |       (original IP) Packet        |
+            +-----------------------------------+
+            |        other EHs such as RH       |
+            +-----------------------------------+ <--\
+            |      IPv6 Destination Ext Hdr     |    |
+            |         (DetNet RI Option)        |    |
+            +-----------------------------------+ DetNet Options
+            |      IPv6 Hop-by-Hop Ext Hdr      |    |
+            | (DetNet Strict/Loose Path Option) |    |
+            +-----------------------------------+ <--/
+            |            IPv6 Header            |
+            +-----------------------------------+
+            |             Data-Link             |
+            +-----------------------------------+
+            |             Physical              |
+            +-----------------------------------+
+
+          Figure 6: DetNet IPv6 Option Encapsulation Alternative 2
+
+
+
+
+
+
+
+
+
+
+Thubert & Yang          Expires 25 February 2022               [Page 15]
+
+Internet-Draft               DetNet Options                  August 2021
+
+
+5.2.  Segment Routing over IPv6 Network
+
+   In SRv6, partial or all of DetNet forwarding and relay nodes may be
+   represented by SRv6 SIDs to determine a specific path for a DetNet
+   flow.  In the former case, DetNet Strict Path Option would be placed
+   in an HbH EH to be read by every DetNet forwarding node, and
+   intercepted should it strays away from its path.  In the latter case,
+   three DetNet Options can be placed either in an HbH EH or in a DOH EH
+   before an SRH, as two encapsulation options are being functionally
+   equivalent, as shown in Figure 7 .
+
+
+            +-----------------------------------+
+            |         DetNet App-Flow           |
+            |       (original IP) Packet        |
+            +-----------------------------------+
+            |       Segment Routing Header      |
+            +-----------------------------------+ <--\
+            |        IPv6 Hop-by-Hop Ex Hdr     |    |
+            |          (DetNet RI Option)       | DetNet Options
+            | (DetNet Strict/Loose Path Option) |    |
+            +-----------------------------------+ <--/
+            |            IPv6 Header            |
+            +-----------------------------------+
+            |             Data-Link             |
+            +-----------------------------------+
+            |             Physical              |
+            +-----------------------------------+
+
+      Figure 7: DetNet IPv6 Option Encapsulation in SRv6 Alternative 1
+
+   In the case where the SRv6 SRH signals the exhaustive list of the
+   Detnet relays along the path, it is recommended to place the DetNet
+   Redundancy Information Option in a DOH EH before the SRH, so that it
+   is processed by every relay node therein without burdening the
+   intermediate DetNet forwarding nodes, as illustrated in Figure 8 and
+   Figure 9.
+
+   If all the nodes that process the loose path information are also
+   listed in the SRH, then the DetNet Loose Path Option may also be
+   placed in the DOH, as shown in Figure 8
+
+
+
+
+
+
+
+
+
+
+Thubert & Yang          Expires 25 February 2022               [Page 16]
+
+Internet-Draft               DetNet Options                  August 2021
+
+
+            +-----------------------------------+
+            |         DetNet App-Flow           |
+            |       (original IP) Packet        |
+            +-----------------------------------+
+            |       Segment Routing Header      |
+            +-----------------------------------+ <--\
+            |        IPv6 Destination Ex Hdr    |    |
+            |          (DetNet RI Option)       | DetNet Options
+            |      (DetNet Loose Path Option)   |    |
+            +-----------------------------------+ <--/
+            |            IPv6 Header            |
+            +-----------------------------------+
+            |             Data-Link             |
+            +-----------------------------------+
+            |             Physical              |
+            +-----------------------------------+
+
+      Figure 8: DetNet IPv6 Option Encapsulation in SRv6 Alternative 2
+
+   Unless the SRH is a strict routing header indicating all the hops on
+   the path, the DetNet Strict Path Option must remain separate in a HbH
+   EH, to be observed by all routers on path, as shown in Figure 9
+
+            +-----------------------------------+
+            |         DetNet App-Flow           |
+            |       (original IP) Packet        |
+            +-----------------------------------+
+            |       Segment Routing Header      |
+            +-----------------------------------+ <--\
+            |        IPv6 Destination Ex Hdr    |    |
+            |          (DetNet RI Option)       |    |
+            +-----------------------------------+ DetNet Options
+            |       IPv6 Hop-by-Hop Ex Hdr      |    |
+            |     (DetNet Strict Path Option)   |    |
+            +-----------------------------------+ <--/
+            |            IPv6 Header            |
+            +-----------------------------------+
+            |             Data-Link             |
+            +-----------------------------------+
+            |             Physical              |
+            +-----------------------------------+
+
+      Figure 9: DetNet IPv6 Option Encapsulation in SRv6 Alternative 3
+
+6.  Security Considerations
+
+7.  IANA Considerations
+
+
+
+
+Thubert & Yang          Expires 25 February 2022               [Page 17]
+
+Internet-Draft               DetNet Options                  August 2021
+
+
+7.1.  New Subregistry for the Redundancy Type
 
    This specification creates a new Subregistry for the "Redundancy Type
    of the Redundancy Option" under the "Internet Protocol Version 6
@@ -722,19 +988,27 @@ Internet-Draft               DetNet Options                  August 2021
 
                Table 2: Redundancy Information Type values
 
-
-
-
-Thubert                 Expires 13 February 2022               [Page 13]
-
-Internet-Draft               DetNet Options                  August 2021
-
-
-6.2.  New Hop-by-Hop Options
+7.2.  New Hop-by-Hop Options
 
    This specification updates the "Destination Options and Hop-by-Hop
    Options" under the "Internet Protocol Version 6 (IPv6) Parameters"
    registry [IPV6-PARMS] with the (suggested) values below:
+
+
+
+
+
+
+
+
+
+
+
+
+Thubert & Yang          Expires 25 February 2022               [Page 18]
+
+Internet-Draft               DetNet Options                  August 2021
+
 
        +------+-----+-----+-------+--------------------+-----------+
        | Hexa | act | chg | rest  | Description        | Reference |
@@ -751,13 +1025,13 @@ Internet-Draft               DetNet Options                  August 2021
 
                      Table 3: DetNet Hop-by-Hop Options
 
-7.  Acknowledgments
+8.  Acknowledgments
 
    TBD
 
-8.  References
+9.  References
 
-8.1.  Normative References
+9.1.  Normative References
 
    [RPL]      Winter, T., Ed., Thubert, P., Ed., Brandt, A., Hui, J.,
               Kelsey, R., Levis, P., Pister, K., Struik, R., Vasseur,
@@ -777,19 +1051,20 @@ Internet-Draft               DetNet Options                  August 2021
               DOI 10.17487/RFC8200, July 2017,
               <https://www.rfc-editor.org/info/rfc8200>.
 
-
-
-
-
-Thubert                 Expires 13 February 2022               [Page 14]
-
-Internet-Draft               DetNet Options                  August 2021
-
-
    [RFC8126]  Cotton, M., Leiba, B., and T. Narten, "Guidelines for
               Writing an IANA Considerations Section in RFCs", BCP 26,
               RFC 8126, DOI 10.17487/RFC8126, June 2017,
               <https://www.rfc-editor.org/info/rfc8126>.
+
+
+
+
+
+
+Thubert & Yang          Expires 25 February 2022               [Page 19]
+
+Internet-Draft               DetNet Options                  August 2021
+
 
    [RFC8877]  Mizrahi, T., Fabini, J., and A. Morton, "Guidelines for
               Defining Packet Timestamps", RFC 8877,
@@ -826,7 +1101,7 @@ Internet-Draft               DetNet Options                  August 2021
               09, 7 July 2021, <https://tools.ietf.org/html/draft-
               pthubert-raw-architecture-09>.
 
-8.2.  Informative References
+9.2.  Informative References
 
    [RPL-PDAO] Thubert, P., Jadhav, R. A., and M. Gillmore, "Root
               initiated routing state in RPL", Work in Progress,
@@ -834,18 +1109,18 @@ Internet-Draft               DetNet Options                  August 2021
               2021, <https://tools.ietf.org/html/draft-ietf-roll-dao-
               projection-19>.
 
-
-
-
-Thubert                 Expires 13 February 2022               [Page 15]
-
-Internet-Draft               DetNet Options                  August 2021
-
-
    [RFC3272]  Awduche, D., Chiu, A., Elwalid, A., Widjaja, I., and X.
               Xiao, "Overview and Principles of Internet Traffic
               Engineering", RFC 3272, DOI 10.17487/RFC3272, May 2002,
               <https://www.rfc-editor.org/info/rfc3272>.
+
+
+
+
+Thubert & Yang          Expires 25 February 2022               [Page 20]
+
+Internet-Draft               DetNet Options                  August 2021
+
 
    [RFC6291]  Andersson, L., van Helvoort, H., Bonica, R., Romascanu,
               D., and S. Mansfield, "Guidelines for the Use of the "OAM"
@@ -888,28 +1163,27 @@ Internet-Draft               DetNet Options                  August 2021
               IEEE 802.1, "Time-Sensitive Networking (TSN) Task Group",
               <http://www.ieee802.org/1/pages/tsn.html>.
 
-
-
-
-
-
-Thubert                 Expires 13 February 2022               [Page 16]
-
-Internet-Draft               DetNet Options                  August 2021
-
-
    [IEEE Std. 1588]
               IEEE, "IEEE Standard for a Precision Clock Synchronization
               Protocol for Networked Measurement and Control Systems",
               IEEE Standard 1588,
               <https://ieeexplore.ieee.org/document/4579760/>.
 
+
+
+
+
+Thubert & Yang          Expires 25 February 2022               [Page 21]
+
+Internet-Draft               DetNet Options                  August 2021
+
+
    [IPV6-PARMS]
               IANA, "Internet Protocol Version 6 (IPv6) Parameters",
               <https://www.iana.org/assignments/ipv6-parameters/
               ipv6-parameters.xhtml>.
 
-Author's Address
+Authors' Addresses
 
    Pascal Thubert (editor)
    Cisco Systems, Inc
@@ -919,6 +1193,11 @@ Author's Address
    Email: pthubert@cisco.com
 
 
+   Fan Yang
+   Huawei Technologies
+   China
+
+   Email: shirley.yangfan@huawei.com
 
 
 
@@ -949,4 +1228,5 @@ Author's Address
 
 
 
-Thubert                 Expires 13 February 2022               [Page 17]
+
+Thubert & Yang          Expires 25 February 2022               [Page 22]

@@ -30,6 +30,16 @@
       </address>
     </author>
 
+    <author fullname="Fan Yang" initials="F." surname="Yang">
+      <organization>Huawei Technologies</organization>
+      <address>
+        <postal>
+          <country>China</country>
+        </postal>
+        <email>shirley.yangfan@huawei.com</email>
+      </address>
+    </author>
+
 <!--
 meta:
 sequence counter
@@ -76,18 +86,29 @@ RPL HbH -> TrackID
    the Application (User) Plane, the Controller Plane, and the Network Plane.
    <xref target="RFC8655"/> places an emphasis on the centralized model whereby
    a controller instantiates a DetNet state in the routers that is located based
-   on matching information in the packet. For IPv6 flows, this document proposes
-   a layer-3 signaling to index that state, using an IPv6 Extension Header (EH).
-</t>
-<t>
+   on matching information in the packet.
+</t><t>
+  The <xref target='RFC8938'>"Deterministic Networking Data Plane Framework"
+  </xref> relies on the 6-tuple to identify an IPv6 flow. But the full DetNet
+  operations require also the capabilities to signal meta-information such as
+  a sequence within that flow, and to transport different types of packets
+  along the same path with the same treatment. For instance, it is required that
+  Operations, Administration, and Maintenance (OAM) <xref target='RFC6291'/>
+  packets and/or multiple flows share the same fate and resource sharing over
+  the same Track or the same Traffic Engineered (TE) <xref target="RFC3272"/>
+  DetNet path. This document proposes a layer-3 signaling that is independent
+  of the upper layer information, to locate the DetNet state and enable the same
+  forwarding nehavior for the data flows and the OAM packets.
+</t><t>
    The <xref target="RFC9030">"6TiSCH Architecture"</xref> leverages RPL, the
    <xref target="RFC6550"> "Routing Protocol for Low Power and Lossy Networks"
    </xref> and introduces concept of a Track as a highly redundant RPL
    Destination Oriented Directed Acyclic Graph (DODAG) rooted at the Track
-   Ingress.
+   Ingress. The Track is indicative of a layer-3 forwarding behavior (e.g., next
+   hops)as opposed to indicative of the upper layer content, so it is more in
+   line with the DetNet needs than the 6-tuple.
 </t>
 <t>
-
    A Track may for instance be installed using RPL route projection
    <xref target='I-D.ietf-roll-dao-projection'/>. In that case, the TrackId is
    an index from a namespace associated to one IPv6 address of the Track Ingress
@@ -125,17 +146,6 @@ RPL HbH -> TrackID
   and increase their use in the Internet. In that context, it makes sense to
   consider Hop-by-Hop Options to transport the information that is relevant
   to DetNet.
-</t>
-<t>
-  The <xref target='RFC8938'>"Deterministic Networking Data Plane Framework"
-  </xref> relies on the 6-tuple to identify an IPv6 flow. But the full DetNet
-  operations require also the capabilities to signal meta-information such as
-  a sequence within that flow, and to transport different types of packets
-  along the same path with the same treatment. For instance, it is required that
-  Operations, Administration, and Maintenance (OAM) <xref target='RFC6291'/>
-  packets and/or multiple flows share the same fate and resource sharing over
-  the same Track or the same Traffic Engineered (TE) <xref target="RFC3272"/>
-  DetNet path.
 </t><t>
   As opposed to the HbH EH, the Destination Option Header (DOH) is only read
   by the destination of the packet, which can be one at a time the collection of
@@ -526,10 +536,17 @@ RPL HbH -> TrackID
    a namespace indicated by the IPv6 source address of the packet.
    </t>
    <t>
-   The DetNet Strict Path Option is to be used in a limited domain and all
-   routers along the path are expected to support the option.
+   The DetNet Strict Path Option is to be used in a limited domain
+   to indicate a routing state that must be present in all nodes to ensure that
+   the packet is routed along a strictly predefined path, for instance pointing
+   at a specific netxt hop with reserved resources for buffers and bandwidth.
+   For that reason all the routers along the path are expected to support the
+   option and own a state indexed by the Strict Path ID indicated therein.
+   </t>
+   <t>
    The option is placed in an HbH EH to be seen by all routers on path.
-   The path indicated therein may also be used by the service sublayer, to signal the scope where the redundancy information is unique across a number
+   The path indicated therein may also be used by the service sublayer, to
+   signal the scope where the redundancy information is unique across a number
    of packets large enough to ensure that a forwarding node never has to handle
    different packets with the same redundancy information, though the same
    value may be found for packets with a different path information.
@@ -565,14 +582,18 @@ RPL HbH -> TrackID
     </t>
    <t>
    DetNet can also leverage the RPL Option that signals a Track in the RPL
-   Packet Information (RPI) <xref target="RFC6553"/>. There are 2 versions of the RPL option, defined respectively in <xref target="RFC6550"/> with the act bits <xref target="RFC8200"/> set to dropped the packet when the option is  unknown, that defined in<xref target="RFC9008"/> which let the option be ignored.
+   Packet Information (RPI) <xref target="RFC6553"/>. There are 2 versions of
+   the RPL option, defined respectively in <xref target="RFC6550"/> with the act
+   bits <xref target="RFC8200"/> set to dropped the packet when the option is
+   unknown, that defined in<xref target="RFC9008"/> which let the option be
+   ignored.
    </t>
 <figure anchor='patho-fmt'><name>DetNet Strict Path Option Format</name>
               <artwork align="center">
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|  Option Type  |  Opt Data Len |    Strict Path ID              |
+|  Option Type  |  Opt Data Len |                 |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  </artwork>
 </figure>
@@ -620,12 +641,16 @@ RPL HbH -> TrackID
    The DetNet Loose Path Option is to be used to signal a path that may be
    loose and may exceed the boundaries of a local domain; a portion of the hops
    may traverse routers in the wider internet that will not leverage the option
-   and are expected to ignore it.
+   and are expected to ignore it. For instance, the path information may signal
+   a specific topology in a multi-topology network and is only important for
+   nodes that participate to more than one topology.
    </t>
    <t>
    An intermediate router that supports the DetNet Loose Path Option but is
    missing the necessary state to forward along the indicated path must ignore
-   the DetNet Loose Path Option.
+   the DetNet Loose Path Option, but it should raise a management alert as
+   this is an unexpected situation with a limited chance that the packet may
+   loop till TTL.
    </t>
 <figure anchor='gpatho-fmt'><name>DetNet Loose Path Option Format</name>
               <artwork align="center">
@@ -701,7 +726,178 @@ RPL HbH -> TrackID
 
     </section>
     <!-- The DetNet Options< -->
+    <section title="Encapsulation of DetNet Options">
+      <t>In this section, encapsulations of three DetNet Options are specified
+      separately in the scenarios of pure IPv6 and SRv6.</t>
 
+      <section title="IPv6 Network ">
+        <t>
+        The DetNet Strict Path Option are intended to be placed in an IPv6 HbH
+        option header since they are used on every DetNet forwarding and relay
+        nodes along the path. The DetNet Loose Path Option and the DetNet
+        Redundancy Information Option may also carried in an IPv6 HbH Option
+        header the case where the set of routers that need the information
+        does not match the destinations along a source route path; those options
+        are intended to be ignored by unaware intermediate routers.
+        </t>
+        <t>
+        In the
+        specific case where path selection and PREOF are end-to-end performed
+        between DetNet edge nodes, Redundancy Information Option can be
+        alternatively placed in IPv6 Destination Option header.
+        The encapsulation options are shown in
+        <xref target='IPalt1'/> and <xref target='IPalt2'/>. </t>
+
+        <figure anchor='IPalt1'>
+        <name>DetNet IPv6 Option Encapsulation Alternative 1</name>
+
+          <artwork align="center"><![CDATA[
+ +-----------------------------------+
+ |         DetNet App-Flow           |
+ |       (original IP) Packet        |
+ +-----------------------------------+
+ |            other EHs              |
+ +-----------------------------------+ <--\
+ |        IPv6 Hop-by-Hop Ex Hdr     |    |
+ |          (DetNet RI Option)       | DetNet Options
+ | (DetNet Strict/Loose Path Option) |    |
+ +-----------------------------------+ <--/
+ |            IPv6 Header            |
+ +-----------------------------------+
+ |             Data-Link             |
+ +-----------------------------------+
+ |             Physical              |
+ +-----------------------------------+
+ ]]>
+ </artwork>
+
+        </figure>
+
+        <figure anchor='IPalt2'><name>DetNet IPv6 Option Encapsulation Alternative 2</name>
+          <artwork align="center">
+          <![CDATA[
+ +-----------------------------------+
+ |         DetNet App-Flow           |
+ |       (original IP) Packet        |
+ +-----------------------------------+
+ |        other EHs such as RH       |
+ +-----------------------------------+ <--\
+ |      IPv6 Destination Ext Hdr     |    |
+ |         (DetNet RI Option)        |    |
+ +-----------------------------------+ DetNet Options
+ |      IPv6 Hop-by-Hop Ext Hdr      |    |
+ | (DetNet Strict/Loose Path Option) |    |
+ +-----------------------------------+ <--/
+ |            IPv6 Header            |
+ +-----------------------------------+
+ |             Data-Link             |
+ +-----------------------------------+
+ |             Physical              |
+ +-----------------------------------+
+ ]]></artwork>
+      </figure>
+      </section>
+
+      <section title="Segment Routing over IPv6 Network">
+        <t>In SRv6, partial or all of DetNet forwarding and relay nodes may be
+        represented by SRv6 SIDs to determine a specific path for a DetNet
+        flow. In the former case, DetNet Strict Path Option would be placed in
+        an HbH EH to be read by every DetNet forwarding node, and intercepted
+        should it strays away from its path. In the latter case, three DetNet
+        Options can be placed either in an HbH EH or in a DOH EH before an
+        SRH, as two encapsulation options are being functionally equivalent,
+        as shown in <xref target='SRalt1'/> .
+        </t>
+
+        <figure anchor='SRalt1'>
+          <name>DetNet IPv6 Option Encapsulation in SRv6 Alternative 1</name>
+          <artwork align="center">
+          <![CDATA[
+ +-----------------------------------+
+ |         DetNet App-Flow           |
+ |       (original IP) Packet        |
+ +-----------------------------------+
+ |       Segment Routing Header      |
+ +-----------------------------------+ <--\
+ |        IPv6 Hop-by-Hop Ex Hdr     |    |
+ |          (DetNet RI Option)       | DetNet Options
+ | (DetNet Strict/Loose Path Option) |    |
+ +-----------------------------------+ <--/
+ |            IPv6 Header            |
+ +-----------------------------------+
+ |             Data-Link             |
+ +-----------------------------------+
+ |             Physical              |
+ +-----------------------------------+   ]]></artwork>
+
+        </figure>
+        <t>
+        In the case where the SRv6 SRH signals the exhaustive list of the Detnet
+        relays along the path,
+        it is recommended to place the DetNet Redundancy Information Option in a
+        DOH EH before the SRH, so that it is processed by every relay node
+        therein without burdening the intermediate DetNet forwarding nodes,
+        as illustrated in <xref target= 'SRalt2'/> and <xref target= 'SRalt3'/>.
+        </t>
+        <t>If all the nodes that process the loose path information are also
+        listed in the SRH, then the DetNet Loose Path Option may also be placed
+        in the DOH, as shown in <xref target= 'SRalt2'/>
+        </t>
+        <figure anchor='SRalt2'>
+          <name>DetNet IPv6 Option Encapsulation in SRv6 Alternative 2</name>
+
+          <artwork align="center"><![CDATA[
+ +-----------------------------------+
+ |         DetNet App-Flow           |
+ |       (original IP) Packet        |
+ +-----------------------------------+
+ |       Segment Routing Header      |
+ +-----------------------------------+ <--\
+ |        IPv6 Destination Ex Hdr    |    |
+ |          (DetNet RI Option)       | DetNet Options
+ |      (DetNet Loose Path Option)   |    |
+ +-----------------------------------+ <--/
+ |            IPv6 Header            |
+ +-----------------------------------+
+ |             Data-Link             |
+ +-----------------------------------+
+ |             Physical              |
+ +-----------------------------------+
+]]></artwork>
+        </figure>
+
+        <t>Unless the SRH is a strict routing header indicating all the hops on
+        the path, the DetNet Strict Path Option must remain separate in a HbH
+        EH, to be observed by all routers on path, as shown in
+        <xref target= 'SRalt3'/>
+        </t>
+        <figure anchor='SRalt3'>
+          <name>DetNet IPv6 Option Encapsulation in SRv6 Alternative 3</name>
+
+          <artwork align="center"><![CDATA[
+ +-----------------------------------+
+ |         DetNet App-Flow           |
+ |       (original IP) Packet        |
+ +-----------------------------------+
+ |       Segment Routing Header      |
+ +-----------------------------------+ <--\
+ |        IPv6 Destination Ex Hdr    |    |
+ |          (DetNet RI Option)       |    |
+ +-----------------------------------+ DetNet Options
+ |       IPv6 Hop-by-Hop Ex Hdr      |    |
+ |     (DetNet Strict Path Option)   |    |
+ +-----------------------------------+ <--/
+ |            IPv6 Header            |
+ +-----------------------------------+
+ |             Data-Link             |
+ +-----------------------------------+
+ |             Physical              |
+ +-----------------------------------+
+]]></artwork>
+        </figure>
+
+      </section>
+    </section>
 
     <!--  00000000000000    -->
 
