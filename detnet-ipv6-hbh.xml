@@ -732,9 +732,9 @@ RPL HbH -> TrackID
 
       <section title="IPv6 Network ">
         <t>
-        The DetNet Strict Path Option are intended to be placed in an IPv6 HbH
-        option header since they are used on every DetNet forwarding and relay
-        nodes along the path. The DetNet Loose Path Option and the DetNet
+        The DetNet Strict Path Option is intended to be placed in an IPv6 HbH
+        EH since it must be processed by every DetNet forwarding
+        node along the path. The DetNet Loose Path Option and the DetNet
         Redundancy Information Option may also carried in an IPv6 HbH Option
         header the case where the set of routers that need the information
         does not match the destinations along a source route path; those options
