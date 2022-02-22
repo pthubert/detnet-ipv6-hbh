@@ -15,7 +15,7 @@
 <?rfc subcompact="no"?>
 <?rfc authorship="yes"?>
 <?rfc tocappendix="yes"?>
-<rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" docName="draft-pthubert-detnet-ipv6-hbh-07"
+<rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" docName="draft-pthubert-detnet-ipv6-hbh-08"
      ipr="trust200902" obsoletes="" updates="" submissionType="IETF" xml:lang="en" version="3">
   <front>
     <title abbrev="DetNet Options">IPv6 Options for DetNet</title>
@@ -118,7 +118,7 @@ RPL HbH -> TrackID
    Options Header <xref target="RFC8200"/> in the IPv6 packet.
 </t>
 <t>
-   The <xref target='I-D.pthubert-raw-architecture'> "Reliable and Available
+   The <xref target='I-D.ietf-raw-architecture'> "Reliable and Available
    Wireless (RAW) Architecture/Framework"</xref>, extends the DetNet Network
    Plane to accomodate one or multiple hops of homogeneous or heterogeneous
    wireless technologies, e.g. a Wi-Fi6 Mesh or parallel radio access links
@@ -200,28 +200,71 @@ RPL HbH -> TrackID
 
    <section anchor="applic" numbered="true" toc="default">
       <name>Applicability</name>
-<t>
-  Transported in IPv6 HbH Options, the DetNet options are available early in
-  the header chain of the packet. A DetNet-aware end system (see section 4.2 of
-  <xref target="RFC8655"/>) may place the options in the header chain when
-  constructing the packet, in which case there is no need of an encapsulation.
-</t><t>
-  Alternatively, the source end system may signal the flow information some
-  other way, or it may lack the full DetNet awareness; in that case the DetNet
-  path endpoints are the provider Edge (PE) routers (see <xref target=
-  "fig5-8655"/> reproducing figure 5 of <xref target="RFC8655"/>) and the
-  Ingress PE needs to encapsulate the packets to add the HbH options.
-</t>
 
+
+<t>The <xref target="RFC8939"> "Deterministic Networking (DetNet) Data Plane: IP"
+   </xref> illustrates the need for DetNet Services at the IP network layer in
+   conformance to the DetNet architecture <xref target="RFC8655"/> and data plane
+   framework <xref target="RFC8938"/>). As the specification does not introduce
+   a new header for DetNet, it also lacks the capability to signal PREOF at the
+   network layer. Instead, the information of application flows (the 6-tuple),
+   on which the network layer has no control, is used directly to makes network
+   layer forwarding decisions. This confuses the signaling of the
+   application-layer "water" that being transported and with the network-layer
+   "pipe" that transports it and makes it problematic to aggregate applications
+   flows and OAM for a equal treatment. It is thus desirable to introduce a
+   new signaling to enable PREOF and flow aggregation independently of the
+   application flow that is more appropriate for network layer operations.
+</t>
+<t><xref target='I-D.varga-detnet-ip-preof'/> provides a methods for signaling
+   PREOF over UDP that combines the MPLS PREOF signaling defined in
+   <xref target="RFC8964"> "DetNet Data Plane: MPLS" </xref> and the mechanisms
+   defined in <xref target="RFC9025">"DetNet Data Plane: MPLS over UDP/IP"</xref>.
+   This approach provides IP version independence, allows to reuse MPLS structures
+   and possibly to bridge MPLS DetNet flows onto IP with minimal mapping effort.
+   It is thus specially valuable in environments where flows can be transported
+   in any combination of MPLS and IP. OTOH, the signaled information inherits
+   the limitations of MPLS in terms of stack structure, and is available
+   after the transport header, which can be harder to reach for a hardware
+   solution, in particular in the presence of a variable header chain at the
+   network layer.
+</t>
 <t>
-  In <xref target="fig5-8655"/>, the DetNet end systems may be f-aware and
-  signal an IPv6 flow using the 6-tuple for the End-to-End service, but may not
-  be s-aware, and may not sequence the packets for Packet Replication,
-  Elimination, and Ordering Functions (PREOF), which operate at the detNet
-  Service Layer. In that case, the Ingress PE will encapsulate the packets for
-  this and possibly other flows to provide a common DetNet Service with OAM and
-  PREOF, across the DetNet-1 service provider network, terminating the tunnel at
-  the Egress PE router.
+   This draft proposes a native IPv6 solution that transports enriched DetNet
+   PREOF information in IPv6 Extension Headers.
+   This method reduces the encapsulation
+   overhead, can be combined with the use of <xref target ="RFC8754">
+   "IPv6 Segment Routing (SRv6) Header (SRH)"</xref>, and simplifies the
+   access to the PREOF data by placing it early in the network header chain.
+   The forwarding information (the path) is advertised independently of the
+   application flow information (observable as the 6-tuple). This enables any
+   mix and match of flows and OAM data over the same path with the same
+   treatment. The method is thus suited for environments that are IPv6-only,
+   where flows can be aggregated over larger pipes and disaggregated again, but
+   it is harder to combine with MPLS and requires that all nodes on path can
+   parse at least the IPv6 Extension Header that signal the path.
+</t>
+<t>
+   Transported in IPv6 Extension Headers, the DetNet options are easier to reach
+   for a hardware or otherwise constrained implementation.
+   A DetNet-aware end-system (see section 4.2 of <xref target="RFC8655"/>) may
+   place the options in the header chain when constructing the packet, in which
+   case there is no need of an encapsulation.
+</t><t>
+   Alternatively, the source end system may signal the flow information some
+   other way, or it may lack the full DetNet awareness; in that case the DetNet
+   path endpoints are the provider Edge (PE) routers (see <xref target=
+   "fig5-8655"/> reproducing figure 5 of <xref target="RFC8655"/>) and the
+  Ingress PE needs to encapsulate the packets to add the HbH options.
+</t><t>
+   In <xref target="fig5-8655"/>, the DetNet end systems may be f-aware and
+   signal an IPv6 flow using the 6-tuple for the End-to-End service, but may not
+   be s-aware, and may not sequence the packets for Packet Replication,
+   Elimination, and Ordering Functions (PREOF), which operate at the detNet
+   Service Layer. In that case, the Ingress PE will encapsulate the packets for
+   this and possibly other flows to provide a common DetNet Service with OAM and
+   PREOF, across the DetNet-1 service provider network, terminating the tunnel
+   at the Egress PE router.
 </t>
 <figure anchor='fig5-8655'><name>Figure 5 of RFC 8655, Reproduced</name>
 <artwork align="center"><![CDATA[                                                       _
@@ -704,7 +747,7 @@ RPL HbH -> TrackID
 
    <t>
    6TiSCH <xref target="RFC9030"/>
-   and RAW <xref target='I-D.pthubert-raw-architecture'/>
+   and RAW <xref target='I-D.ietf-raw-architecture'/>
    signal a Track using a RPL Option <xref target="RFC6553"/>
    with a RPLInstanceID used as TrackID.
    This specification reuses the RPL option as a method to signal a DetNet path.
@@ -1031,7 +1074,7 @@ RPL HbH -> TrackID
 
 
 <displayreference   target="I-D.ietf-roll-dao-projection"    to="RPL-PDAO"/>
-<displayreference   target="I-D.pthubert-raw-architecture"   to="RAW-ARCH"/>
+<displayreference   target="I-D.ietf-raw-architecture"   to="RAW-ARCH"/>
 <displayreference   target="I-D.hinden-6man-hbh-processing"  to="HbH-UPDT"/>
 
 <displayreference   target="IEEE802154"               to="IEEE Std. 802.15.4"/>
@@ -1063,14 +1106,12 @@ RPL HbH -> TrackID
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8655.xml"/>
 <!-- Deterministic Networking Architecture -->
 
-<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9008.xml"/>
-<!-- use fo RPL info -->
 
-<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9030.xml"/>
-<!-- 6TiSCH Architecture -->
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8938.xml"/>
+<!--   Deterministic Networking (DetNet) Data Plane Framework -->
 
-<xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.pthubert-raw-architecture.xml'/>
-
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8939.xml"/>
+ Deterministic Networking (DetNet) Data Plane: IP
       </references>
     <!--Normative References-->
 
@@ -1078,7 +1119,7 @@ RPL HbH -> TrackID
       <references>
     <name>Informative References</name>
 
-
+<xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.varga-detnet-ip-preof.xml'/>
 
 <xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-roll-dao-projection.xml'/>
 
@@ -1106,8 +1147,21 @@ RPL HbH -> TrackID
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8754.xml"/>
 <!-- SRv6 SRH -->
 
-<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8938.xml"/>
-<!--   Deterministic Networking (DetNet) Data Plane Framework -->
+
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8964.xml"/>
+
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9025.xml"/>
+<!--  Deterministic Networking (DetNet) Data Plane: MPLS over UDP/IP  -->
+
+
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9008.xml"/>
+<!-- use fo RPL info -->
+
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9030.xml"/>
+<!-- 6TiSCH Architecture -->
+
+<xi:include href='http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-raw-architecture.xml'/>
+
 
       <reference anchor='IEEE802154'>
          <front>
