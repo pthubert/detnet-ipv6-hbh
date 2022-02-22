@@ -10,7 +10,7 @@ Expires: 26 August 2022                              Huawei Technologies
 
 
                         IPv6 Options for DetNet
-                   draft-pthubert-detnet-ipv6-hbh-07
+                   draft-pthubert-detnet-ipv6-hbh-08
 
 Abstract
 
@@ -143,15 +143,15 @@ Internet-Draft               DetNet Options                February 2022
    placed in a RPL Option [RFC6553] located in an IPv6 Hop-by-Hop (HbH)
    Options Header [IPv6] in the IPv6 packet.
 
-   The "Reliable and Available Wireless (RAW) Architecture/Framework"
-   [RAW-ARCH], extends the DetNet Network Plane to accomodate one or
-   multiple hops of homogeneous or heterogeneous wireless technologies,
-   e.g. a Wi-Fi6 Mesh or parallel radio access links combining Wi-Fi and
-   5G.  The RAW Architecture reuses the concept of Track and introduces
-   a new dataplane component, the Path Selection Engine (PSE), to
-   dynamically select a subpath and maintain the required quality of
-   service within a Track in the face of the rapid evolution of the
-   medium properties.
+   The "Reliable and Available Wireless (RAW) Architecture" [RAW-ARCH],
+   extends the DetNet Network Plane to accomodate one or multiple hops
+   of homogeneous or heterogeneous wireless technologies, e.g. a Wi-Fi6
+   Mesh or parallel radio access links combining Wi-Fi and 5G.  The RAW
+   Architecture reuses the concept of Track and introduces a new
+   dataplane component, the Path Selection Engine (PSE), to dynamically
+   select a subpath and maintain the required quality of service within
+   a Track in the face of the rapid evolution of the medium properties.
+
 
 
 
@@ -1139,24 +1139,6 @@ Internet-Draft               DetNet Options                February 2022
               DOI 10.17487/RFC8655, October 2019,
               <https://www.rfc-editor.org/info/rfc8655>.
 
-   [RFC9008]  Robles, M.I., Richardson, M., and P. Thubert, "Using RPI
-              Option Type, Routing Header for Source Routes, and IPv6-
-              in-IPv6 Encapsulation in the RPL Data Plane", RFC 9008,
-              DOI 10.17487/RFC9008, April 2021,
-              <https://www.rfc-editor.org/info/rfc9008>.
-
-   [6TiSCH-ARCH]
-              Thubert, P., Ed., "An Architecture for IPv6 over the Time-
-              Slotted Channel Hopping Mode of IEEE 802.15.4 (6TiSCH)",
-              RFC 9030, DOI 10.17487/RFC9030, May 2021,
-              <https://www.rfc-editor.org/info/rfc9030>.
-
-   [RAW-ARCH] Thubert, P., Papadopoulos, G. Z., and L. Berger, "Reliable
-              and Available Wireless Architecture/Framework", Work in
-              Progress, Internet-Draft, draft-pthubert-raw-architecture-
-              09, 7 July 2021, <https://tools.ietf.org/html/draft-
-              pthubert-raw-architecture-09>.
-
 9.2.  Informative References
 
    [I-D.varga-detnet-ip-preof]
@@ -1165,18 +1147,6 @@ Internet-Draft               DetNet Options                February 2022
               Work in Progress, Internet-Draft, draft-varga-detnet-ip-
               preof-02, 1 February 2022, <https://tools.ietf.org/html/
               draft-varga-detnet-ip-preof-02>.
-
-
-
-
-
-
-
-
-Thubert & Yang           Expires 26 August 2022                [Page 21]
-
-Internet-Draft               DetNet Options                February 2022
-
 
    [RPL-PDAO] Thubert, P. and R. A. Jadhav, "Root initiated routing
               state in RPL", Work in Progress, Internet-Draft, draft-
@@ -1199,6 +1169,14 @@ Internet-Draft               DetNet Options                February 2022
               "Network Time Protocol Version 4: Protocol and Algorithms
               Specification", RFC 5905, DOI 10.17487/RFC5905, June 2010,
               <https://www.rfc-editor.org/info/rfc5905>.
+
+
+
+
+Thubert & Yang           Expires 26 August 2022                [Page 21]
+
+Internet-Draft               DetNet Options                February 2022
+
 
    [RFC8402]  Filsfils, C., Ed., Previdi, S., Ed., Ginsberg, L.,
               Decraene, B., Litkowski, S., and R. Shakir, "Segment
@@ -1225,15 +1203,6 @@ Internet-Draft               DetNet Options                February 2022
               IP", RFC 8939, DOI 10.17487/RFC8939, November 2020,
               <https://www.rfc-editor.org/info/rfc8939>.
 
-
-
-
-
-Thubert & Yang           Expires 26 August 2022                [Page 22]
-
-Internet-Draft               DetNet Options                February 2022
-
-
    [RFC8964]  Varga, B., Ed., Farkas, J., Berger, L., Malis, A., Bryant,
               S., and J. Korhonen, "Deterministic Networking (DetNet)
               Data Plane: MPLS", RFC 8964, DOI 10.17487/RFC8964, January
@@ -1243,6 +1212,33 @@ Internet-Draft               DetNet Options                February 2022
               Bryant, "Deterministic Networking (DetNet) Data Plane:
               MPLS over UDP/IP", RFC 9025, DOI 10.17487/RFC9025, April
               2021, <https://www.rfc-editor.org/info/rfc9025>.
+
+   [RFC9008]  Robles, M.I., Richardson, M., and P. Thubert, "Using RPI
+              Option Type, Routing Header for Source Routes, and IPv6-
+              in-IPv6 Encapsulation in the RPL Data Plane", RFC 9008,
+              DOI 10.17487/RFC9008, April 2021,
+              <https://www.rfc-editor.org/info/rfc9008>.
+
+   [6TiSCH-ARCH]
+              Thubert, P., Ed., "An Architecture for IPv6 over the Time-
+              Slotted Channel Hopping Mode of IEEE 802.15.4 (6TiSCH)",
+              RFC 9030, DOI 10.17487/RFC9030, May 2021,
+              <https://www.rfc-editor.org/info/rfc9030>.
+
+
+
+
+
+Thubert & Yang           Expires 26 August 2022                [Page 22]
+
+Internet-Draft               DetNet Options                February 2022
+
+
+   [RAW-ARCH] Thubert, P. and G. Z. Papadopoulos, "Reliable and
+              Available Wireless Architecture", Work in Progress,
+              Internet-Draft, draft-ietf-raw-architecture-03, 14 January
+              2022, <https://tools.ietf.org/html/draft-ietf-raw-
+              architecture-03>.
 
    [IEEE Std. 802.15.4]
               IEEE standard for Information Technology, "IEEE Std.
@@ -1280,6 +1276,10 @@ Authors' Addresses
    China
 
    Email: shirley.yangfan@huawei.com
+
+
+
+
 
 
 
