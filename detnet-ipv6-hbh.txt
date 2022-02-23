@@ -5,8 +5,8 @@
 DetNet                                                   P. Thubert, Ed.
 Internet-Draft                                             Cisco Systems
 Intended status: Standards Track                                 F. Yang
-Expires: 26 August 2022                              Huawei Technologies
-                                                        22 February 2022
+Expires: 27 August 2022                              Huawei Technologies
+                                                        23 February 2022
 
 
                         IPv6 Options for DetNet
@@ -39,7 +39,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 26 August 2022.
+   This Internet-Draft will expire on 27 August 2022.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Thubert & Yang           Expires 26 August 2022                 [Page 1]
+Thubert & Yang           Expires 27 August 2022                 [Page 1]
 
 Internet-Draft               DetNet Options                February 2022
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Thubert & Yang           Expires 26 August 2022                 [Page 2]
+Thubert & Yang           Expires 27 August 2022                 [Page 2]
 
 Internet-Draft               DetNet Options                February 2022
 
@@ -165,7 +165,7 @@ Internet-Draft               DetNet Options                February 2022
 
 
 
-Thubert & Yang           Expires 26 August 2022                 [Page 3]
+Thubert & Yang           Expires 27 August 2022                 [Page 3]
 
 Internet-Draft               DetNet Options                February 2022
 
@@ -182,12 +182,20 @@ Internet-Draft               DetNet Options                February 2022
    changed to allow a packet with a RPL option to escape the RPL domain
    in the larger Internet [RFC9008].
 
+   [DetNet-ARCH] makes it clear that as opposed to the open Internet,
+   the DetNet domain is a limited domain, in which it is possible to
+   ensure that all routers support a certain functionality and can be
+   configured by an harmonized set of management systems and
+   controllers.  As in a RPL domain, it is thus possible to deploy a
+   solution that leverages new IPv6 EHs.
+
    "IPv6 Hop-by-Hop Options Processing Procedures" [HbH-UPDT] further
-   specifies the procedures for how IPv6 Hop-by-Hop options are
-   processed to make their processing even more practical and increase
-   their use in the Internet.  In that context, it makes sense to
-   consider Hop-by-Hop Options to transport the information that is
-   relevant to DetNet.
+   specifies the procedures for how IPv6 HbH options are processed to
+   make their processing even more practical and increase their use in
+   the Internet.  While the DetNet forwarding plane does not operate in
+   the Internet at large, this illustrates that it can be realistic to
+   consider IPv6 EHs and in particular the Hbh EH to transport DetNet
+   information.
 
    As opposed to the HbH EH, the Destination Option Header (DOH) is only
    read by the destination of the packet, which can be one at a time the
@@ -211,20 +219,19 @@ Internet-Draft               DetNet Options                February 2022
    need of a deeper inspection of the packet (up to and beyond the
    transport header).
 
+
+
+Thubert & Yang           Expires 27 August 2022                 [Page 4]
+
+Internet-Draft               DetNet Options                February 2022
+
+
    For instance, the DetNet Redundancy Information Option may be placed
    in a DOH before an SRH that signals the exhaustive list of the DetNet
    relays along the path of the packet, so every relay can process the
    redundancy information therein, while the DetNet Strict Path Option
    would be placed in an HbH EH to be read by every DetNet forwarding
    node, and intercepted should it strays away from its path.
-
-
-
-
-Thubert & Yang           Expires 26 August 2022                 [Page 4]
-
-Internet-Draft               DetNet Options                February 2022
-
 
 2.  Terminology
 
@@ -267,6 +274,14 @@ Internet-Draft               DetNet Options                February 2022
    harder to reach for a hardware solution, in particular in the
    presence of a variable header chain at the network layer.
 
+
+
+
+Thubert & Yang           Expires 27 August 2022                 [Page 5]
+
+Internet-Draft               DetNet Options                February 2022
+
+
    This draft proposes a native IPv6 solution that transports enriched
    DetNet PREOF information in IPv6 Extension Headers.  This method
    reduces the encapsulation overhead, can be combined with the use of
@@ -274,14 +289,6 @@ Internet-Draft               DetNet Options                February 2022
    the access to the PREOF data by placing it early in the network
    header chain.  The forwarding information (the path) is advertised
    independently of the application flow information (observable as the
-
-
-
-Thubert & Yang           Expires 26 August 2022                 [Page 5]
-
-Internet-Draft               DetNet Options                February 2022
-
-
    6-tuple).  This enables any mix and match of flows and OAM data over
    the same path with the same treatment.  The method is thus suited for
    environments that are IPv6-only, where flows can be aggregated over
@@ -326,14 +333,7 @@ Internet-Draft               DetNet Options                February 2022
 
 
 
-
-
-
-
-
-
-
-Thubert & Yang           Expires 26 August 2022                 [Page 6]
+Thubert & Yang           Expires 27 August 2022                 [Page 6]
 
 Internet-Draft               DetNet Options                February 2022
 
@@ -389,7 +389,7 @@ Internet-Draft               DetNet Options                February 2022
 
 
 
-Thubert & Yang           Expires 26 August 2022                 [Page 7]
+Thubert & Yang           Expires 27 August 2022                 [Page 7]
 
 Internet-Draft               DetNet Options                February 2022
 
@@ -445,7 +445,7 @@ Internet-Draft               DetNet Options                February 2022
 
 
 
-Thubert & Yang           Expires 26 August 2022                 [Page 8]
+Thubert & Yang           Expires 27 August 2022                 [Page 8]
 
 Internet-Draft               DetNet Options                February 2022
 
@@ -501,7 +501,7 @@ Internet-Draft               DetNet Options                February 2022
 
 
 
-Thubert & Yang           Expires 26 August 2022                 [Page 9]
+Thubert & Yang           Expires 27 August 2022                 [Page 9]
 
 Internet-Draft               DetNet Options                February 2022
 
@@ -557,7 +557,7 @@ Internet-Draft               DetNet Options                February 2022
 
 
 
-Thubert & Yang           Expires 26 August 2022                [Page 10]
+Thubert & Yang           Expires 27 August 2022                [Page 10]
 
 Internet-Draft               DetNet Options                February 2022
 
@@ -613,7 +613,7 @@ Internet-Draft               DetNet Options                February 2022
 
 
 
-Thubert & Yang           Expires 26 August 2022                [Page 11]
+Thubert & Yang           Expires 27 August 2022                [Page 11]
 
 Internet-Draft               DetNet Options                February 2022
 
@@ -669,7 +669,7 @@ Internet-Draft               DetNet Options                February 2022
 
 
 
-Thubert & Yang           Expires 26 August 2022                [Page 12]
+Thubert & Yang           Expires 27 August 2022                [Page 12]
 
 Internet-Draft               DetNet Options                February 2022
 
@@ -725,7 +725,7 @@ Internet-Draft               DetNet Options                February 2022
 
 
 
-Thubert & Yang           Expires 26 August 2022                [Page 13]
+Thubert & Yang           Expires 27 August 2022                [Page 13]
 
 Internet-Draft               DetNet Options                February 2022
 
@@ -781,7 +781,7 @@ Internet-Draft               DetNet Options                February 2022
 
 
 
-Thubert & Yang           Expires 26 August 2022                [Page 14]
+Thubert & Yang           Expires 27 August 2022                [Page 14]
 
 Internet-Draft               DetNet Options                February 2022
 
@@ -837,7 +837,7 @@ Internet-Draft               DetNet Options                February 2022
 
 
 
-Thubert & Yang           Expires 26 August 2022                [Page 15]
+Thubert & Yang           Expires 27 August 2022                [Page 15]
 
 Internet-Draft               DetNet Options                February 2022
 
@@ -893,7 +893,7 @@ Internet-Draft               DetNet Options                February 2022
 
 
 
-Thubert & Yang           Expires 26 August 2022                [Page 16]
+Thubert & Yang           Expires 27 August 2022                [Page 16]
 
 Internet-Draft               DetNet Options                February 2022
 
@@ -949,7 +949,7 @@ Internet-Draft               DetNet Options                February 2022
 
 
 
-Thubert & Yang           Expires 26 August 2022                [Page 17]
+Thubert & Yang           Expires 27 August 2022                [Page 17]
 
 Internet-Draft               DetNet Options                February 2022
 
@@ -1005,7 +1005,7 @@ Internet-Draft               DetNet Options                February 2022
 
 
 
-Thubert & Yang           Expires 26 August 2022                [Page 18]
+Thubert & Yang           Expires 27 August 2022                [Page 18]
 
 Internet-Draft               DetNet Options                February 2022
 
@@ -1061,7 +1061,7 @@ Internet-Draft               DetNet Options                February 2022
 
 
 
-Thubert & Yang           Expires 26 August 2022                [Page 19]
+Thubert & Yang           Expires 27 August 2022                [Page 19]
 
 Internet-Draft               DetNet Options                February 2022
 
@@ -1117,7 +1117,7 @@ Internet-Draft               DetNet Options                February 2022
 
 
 
-Thubert & Yang           Expires 26 August 2022                [Page 20]
+Thubert & Yang           Expires 27 August 2022                [Page 20]
 
 Internet-Draft               DetNet Options                February 2022
 
@@ -1127,12 +1127,6 @@ Internet-Draft               DetNet Options                February 2022
               DOI 10.17487/RFC8877, September 2020,
               <https://www.rfc-editor.org/info/rfc8877>.
 
-   [HbH-UPDT] Hinden, R. M. and G. Fairhurst, "IPv6 Hop-by-Hop Options
-              Processing Procedures", Work in Progress, Internet-Draft,
-              draft-hinden-6man-hbh-processing-01, 2 June 2021,
-              <https://tools.ietf.org/html/draft-hinden-6man-hbh-
-              processing-01>.
-
    [DetNet-ARCH]
               Finn, N., Thubert, P., Varga, B., and J. Farkas,
               "Deterministic Networking Architecture", RFC 8655,
@@ -1140,6 +1134,12 @@ Internet-Draft               DetNet Options                February 2022
               <https://www.rfc-editor.org/info/rfc8655>.
 
 9.2.  Informative References
+
+   [HbH-UPDT] Hinden, R. M. and G. Fairhurst, "IPv6 Hop-by-Hop Options
+              Processing Procedures", Work in Progress, Internet-Draft,
+              draft-hinden-6man-hbh-processing-01, 2 June 2021,
+              <https://tools.ietf.org/html/draft-hinden-6man-hbh-
+              processing-01>.
 
    [I-D.varga-detnet-ip-preof]
               Varga, B., Farkas, J., and A. G. Malis, "Deterministic
@@ -1173,7 +1173,7 @@ Internet-Draft               DetNet Options                February 2022
 
 
 
-Thubert & Yang           Expires 26 August 2022                [Page 21]
+Thubert & Yang           Expires 27 August 2022                [Page 21]
 
 Internet-Draft               DetNet Options                February 2022
 
@@ -1229,7 +1229,7 @@ Internet-Draft               DetNet Options                February 2022
 
 
 
-Thubert & Yang           Expires 26 August 2022                [Page 22]
+Thubert & Yang           Expires 27 August 2022                [Page 22]
 
 Internet-Draft               DetNet Options                February 2022
 
@@ -1285,4 +1285,4 @@ Authors' Addresses
 
 
 
-Thubert & Yang           Expires 26 August 2022                [Page 23]
+Thubert & Yang           Expires 27 August 2022                [Page 23]
