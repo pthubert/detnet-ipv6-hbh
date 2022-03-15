@@ -15,7 +15,7 @@
 <?rfc subcompact="no"?>
 <?rfc authorship="yes"?>
 <?rfc tocappendix="yes"?>
-<rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" docName="draft-pthubert-detnet-ipv6-hbh-08"
+<rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" consensus="true" docName="draft-pthubert-detnet-ipv6-hbh-08"
      ipr="trust200902" obsoletes="" updates="" submissionType="IETF" xml:lang="en" version="3">
   <front>
     <title abbrev="DetNet Options">IPv6 Options for DetNet</title>
@@ -405,6 +405,26 @@ RPL HbH -> TrackID
    function that the sense of time at the origin node is synchronized with the
    rest of the DetNet network.
    </t>
+   <t>
+   In a general manner, time stamps are impractical for high speed communication
+   with hardware assisted forwarding, because of:
+   </t>
+   <ul>
+   <li>
+   The hardware complexity to set a precise time stamp in existing hardware, and
+   to emiminate at high speeds, because efficient methods of matching duplicates
+   (bitmasks for sequence number spaces) cannot be used
+   </li>
+   <li>
+   Functionality loss, as time stamps do not allow to discover a loss
+   </li>
+   <li>
+    The elimination function becomes much harder to implement at high speeds,
+    because efficient methods of matching duplicates (bitmasks for sequence
+    number spaces) cannot be used
+
+   </li>
+   </ul>
    <t>
    IEEEE TSN <xref target='IEEE8021TSN'/> defined a redundancy tag (R-Tag) for
    the IEEE Std. 802.1CB Frame Replication and Elimination for Reliability (FRER).
@@ -1064,7 +1084,8 @@ RPL HbH -> TrackID
 
 
    <section><name>Acknowledgments</name>
-   <t>TBD
+   <t>The authors wish to thanks Toerless Eckert for his review and his text
+   suggestions applied in this document.
    </t>
    </section>
    <!-- Acknowledgments -->
